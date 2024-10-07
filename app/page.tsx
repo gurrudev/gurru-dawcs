@@ -19,7 +19,7 @@ export default function Home() {
                 <SquareArrowOutUpRight className="w-4 h-4 font-extrabold" />
             </Link>
             <h1 className="text-3xl font-bold mb-4 sm:text-7xl">
-                {"Utility Tools & Docs for Developers 🚀"}
+                {"Utility Tools"} & {"Docs for Developers 🚀"}
             </h1>
             <p className="mb-8 sm:text-xl max-w-[800px] text-muted-foreground">
                 {
