@@ -119,3 +119,28 @@ blockquote > p::before {
 .highlight-comp > code {
     background-color: transparent !important;
 }
+
+/* scrollbar */
+
+/* WebKit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #3b83f600; /* Track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #eb89392d; /* Scrollbar color */
+  border-radius: 10px; /* Rounded corners */
+  border: 2px solid transparent; /* Space around the scrollbar */
+}
+
+/* Firefox */
+.scrollbar-thin {
+  scrollbar-width: thin; /* Make scrollbar thinner */
+  border-radius: 10px; /* Rounded corners */
+  scrollbar-color: #eb89392d #3b83f600; /* Scrollbar and track colors */
+}

@@ -19,7 +19,10 @@ export default function Home() {
                 <SquareArrowOutUpRight className="w-4 h-4 font-extrabold" />
             </Link>
             <h1 className="text-3xl font-bold mb-4 sm:text-7xl">
-                {"Utility Tools"} & {"Docs for Developers 🚀"}
+                <span className=" ">{"Utility Too"}</span>
+                {"ls "}
+                <span className="text-orange-400">{"& Docs "}</span>
+                {"for Developers 🚀"}
             </h1>
             <p className="mb-8 sm:text-xl max-w-[800px] text-muted-foreground">
                 {
@@ -47,10 +50,13 @@ export default function Home() {
                   Read Blog
               </Link> */}
             </div>
-            <span className="flex flex-row items-start sm:gap-2 gap-0.5 text-muted-foreground text-md mt-7 -mb-12 max-[800px]:mb-12 font-code text-base font-medium">
+            <p className="flex flex-row items-start sm:gap-2 gap-0.5 text-muted-foreground text-md mt-7 -mb-12 max-[800px]:mb-12 font-code text-base font-medium">
                 <TerminalSquareIcon className="w-5 h-5 mr-1 mt-0.5" />
-                {"npm i string-utility-ts"} <span className="text-blue-500 text-[10px] font-bold font-sans">✨New</span>
-            </span>
+                {"npm i string-utility-ts"}{" "}
+                <span className="text-orange-400 border border-orange-400 py-0 px-2 rounded-lg text-sm">
+                    New
+                </span>
+            </p>
         </div>
     );
 }
