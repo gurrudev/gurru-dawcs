@@ -8,7 +8,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GurruDawcs",
-  // metadataBase: new URL("https://ashutoshpawar.live"),
+  metadataBase: new URL("https://gurrudawcs.vercel.app"),
   description:
     "This comprehensive documentation template, crafted with Next.js and available as open-source, delivers a sleek and responsive design, tailored to meet all your project documentation requirements.",
 };
