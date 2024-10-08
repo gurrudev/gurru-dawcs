@@ -33,7 +33,7 @@ export default function Home() {
                 <Link
                     href={`/docs${page_routes[0].href}`}
                     className={buttonVariants({
-                        className: "px-6",
+                        className: "!bg-orange-400 !font-bold  hover:!bg-orange-400",
                         size: "lg",
                     })}
                 >
@@ -53,7 +53,7 @@ export default function Home() {
             <p className="flex flex-row items-start sm:gap-2 gap-0.5 text-muted-foreground text-md mt-7 -mb-12 max-[800px]:mb-12 font-code text-base font-medium">
                 <TerminalSquareIcon className="w-5 h-5 mr-1 mt-0.5" />
                 {"npm i string-utility-ts"}{" "}
-                <span className="text-orange-400 border border-orange-400 py-0 px-2 rounded-lg text-sm">
+                <span className="text-orange-400 border border-orange-400 py-0 ml-2 px-2 rounded-lg text-sm">
                     New
                 </span>
             </p>
