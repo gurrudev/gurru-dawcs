@@ -1,0 +1,155 @@
+---
+title: Quick Start Guide
+description: This section provides an overview of the Quick Start Guide for String Utility TS.
+---
+
+## Overview
+
+Welcome to the `Quick Start Guide` for String Utility TS, a lightweight and efficient string manipulation library designed for JavaScript and TypeScript developers. This guide will walk you through the basic setup, installation, and usage of the library, helping you integrate it quickly into your projects.
+
+
+## Examples
+
+### 1. Reverse String
+
+Reverses the characters in the string.
+
+```jsx showLineNumbers {8}
+import { reverseString } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = reverseString(str)
+console.log(result) // dlroW olleH
+```
+
+### 2. Truncate 
+
+Truncates the string to a specified length and appends "..." if necessary.
+
+```jsx showLineNumbers {8}
+import { truncate } = from 'string-utility-ts'
+
+const str = `String Utility TS is a lightweight, easy-to-use library for JavaScript and TypeScript that provides a collection of commonly used string manipulation functions.`
+
+const result = truncate(str2, 20)
+console.log(result);    // String Utility TS is...
+```
+### 3. Starts With 
+
+Checks if the string starts with the specified substring.
+
+```jsx showLineNumbers {8}
+import { startsWith } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = startsWith(str, 'Hello')
+console.log(result);    // true
+```
+
+### 4. Ends With 
+
+Checks if the string ends with the specified substring.
+
+```jsx showLineNumbers {8}
+import { endsWith } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = endsWith(str, 'Hello')
+console.log(result);    // false
+```
+
+### 5. Capitalize 
+
+Capitalizes the first letter of the input string and converts the rest to lowercase.
+
+```jsx showLineNumbers {8}
+import { capitalize } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = capitalize(str)
+console.log(result);    // Hello world
+```
+
+### 6. Camel Case 
+
+Converts a string to camelCase.
+
+```jsx showLineNumbers {8}
+import { camelCase } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = camelCase(str)
+console.log(result);    // helloWorld
+```
+
+### 7. Kebab Case 
+
+Converts a string to kebab-case.
+
+```jsx showLineNumbers {8}
+import { kebabCase } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = kebabCase(str)
+console.log(result);    // hello-world
+```
+
+### 8. Repeat 
+
+Repeats the string a specified number of times.
+
+```jsx showLineNumbers {8}
+import { repeat } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = repeat(str, 3)
+console.log(result);    // Hello World Hello World Hello World
+```
+### 9. Upper Case 
+
+Converts a string to Upper Case.
+
+```jsx showLineNumbers {8}
+import { upperCase } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = upperCase(str)
+console.log(result);    // HELLO WORLD
+```
+### 10. Lower Case 
+
+Converts a string to Lower Case.
+
+```jsx showLineNumbers {8}
+import { lowerCase } = from 'string-utility-ts'
+
+const str = 'Hello World'
+
+const result = lowerCase(str)
+console.log(result);    // hello world
+```
+### 11. Stripped String 
+
+Removes HTML from the String.
+
+```jsx showLineNumbers {8}
+import { strippedString } = from 'string-utility-ts'
+
+const str = `<p class="description"><span class="text-colorized">String Utility TS</span> is a lightweight, easy-to-use library for JavaScript and TypeScript that provides a collection of commonly used string manipulation functions.</p>`
+
+const result = strippedString(str)
+console.log(result);    // String Utility TS is a lightweight, easy-to-use library for JavaScript and TypeScript that provides a collection of commonly used string manipulation functions.
+```
+
+
+## Conclusion
+
+The `Quick Start Guide` section is your starting point for exploring the application. Follow the steps above to get started quickly and easily.

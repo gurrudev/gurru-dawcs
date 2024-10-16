@@ -1,0 +1,57 @@
+---
+title: FAQ
+description: Frequently Asked Questions about String Utility TS.
+---
+
+# Frequently Asked Questions
+
+Below are some common questions and answers to help you understand and use **String Utility TS** more effectively.
+
+## What is String Utility TS?
+
+**String Utility TS** is a lightweight and efficient library for performing common string manipulation tasks in JavaScript and TypeScript. It provides functions for operations like reversing strings, converting case (camelCase, kebab-case), truncating, and more, helping developers streamline string-related tasks in their projects.
+
+## How do I install String Utility TS?
+
+You can install the library using any of the following package managers:
+
+```bash
+# Using npm
+npm install string-utility-ts
+```
+## Can I use String Utility TS in both JavaScript and TypeScript projects?
+Yes, String Utility TS is fully compatible with both JavaScript and TypeScript. If you’re using TypeScript, you’ll also benefit from type definitions for each function, making your code more predictable and reducing errors.
+
+## What are the main functions provided by the library?
+Here are some of the most commonly used functions in String Utility TS:
+
+- **reverseString**: Reverses the characters in a string.
+- **truncate**: Truncates the string to a specific length.
+- **startsWith / endsWith**: Checks if a string starts or ends with a specific substring.
+- **capitalize**: Capitalizes the first letter of a string.
+- **camelCase / kebabCase**: Converts strings into camelCase or kebab-case.
+
+You can explore the full list of available functions in our documentation.
+
+## Is String Utility TS lightweight?
+Yes, String Utility TS is designed to be lightweight and efficient, making it a perfect choice for projects where performance and small bundle sizes are important.
+
+## How do I import functions from String Utility TS?
+Importing functions from String Utility TS is straightforward. You can import only the functions you need, which helps keep your code clean and lightweight.
+
+```jsx showLineNumbers {8}
+import { capitalize, truncate } from 'string-utility-ts';
+
+const result = capitalize('hello world');
+console.log(result); // Hello world
+
+const truncated = truncate('String Utility TS is amazing!', 10);
+console.log(truncated); // String Ut...
+```
+
+## How do I report bugs or contribute to the project?
+If you find any bugs or want to contribute to the development of String Utility TS, you can visit the [GitHub repository](https://github.com/gurrudev/string-utility.git) and open an issue or a pull request. Contributions are always welcome!
+
+## Can I suggest new features?
+Absolutely! We encourage users to suggest new features or improvements. Feel free to open an issue on our [GitHub repository](https://github.com/gurrudev/string-utility.git) with your ideas.
+

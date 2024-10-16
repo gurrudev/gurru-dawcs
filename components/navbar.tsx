@@ -74,8 +74,7 @@ export function Navbar() {
 export function Logo() {
   return (
       <Link href="/" className="flex items-center gap-2.5">
-          {/* <CommandIcon className="w-6 h-6 text-muted-foreground" strokeWidth={2} /> */}
-          <Image src={logoG} alt="gDocs" width={35} height={35} />
+          <Image src={logoG} alt="gDocs" width={30} height={30} />
           <h2 className="text-md font-extrabold font-code">GurruDawcs</h2>
       </Link>
   );
