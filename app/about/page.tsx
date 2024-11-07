@@ -7,7 +7,7 @@ export default function About() {
                 About GurruDawcs
             </h1>
             <div>
-                <p className="text-base lg:text-lg leading-relaxed mt-8 text-justify max-w-4xl">
+                <p className="text-base lg:text-lg leading-relaxed mt-8  max-w-4xl">
                     Welcome to <strong>GurruDawcs</strong>,{" "}
                     {`your go-to resource for
                 documentation on custom libraries and essential utility tools
@@ -20,7 +20,7 @@ export default function About() {
                 <h2 className="text-2xl lg:text-2xl font-bold mt-10">
                     What is GurruDawcs?
                 </h2>
-                <p className="text-base lg:text-lg leading-relaxed mt-4 text-justify max-w-4xl">
+                <p className="text-base lg:text-lg leading-relaxed mt-4  max-w-4xl">
                     GurruDawcs is a platform designed to host comprehensive
                     documentation for various utility tools and libraries
                     created with developers in mind. From string manipulation
@@ -31,7 +31,7 @@ export default function About() {
                 <h2 className="text-2xl lg:text-2xl font-bold mt-10">
                     Why GurruDawcs?
                 </h2>
-                <div className="text-base lg:text-lg leading-relaxed mt-4 text-justify max-w-4xl">
+                <div className="text-base lg:text-lg leading-relaxed mt-4  max-w-4xl">
                     As a developer, you often find yourself reinventing the
                     wheel or searching for utilities scattered across the web.
                     GurruDawcs bridges that gap by offering:
@@ -57,7 +57,7 @@ export default function About() {
                 <h2 className="text-2xl lg:text-2xl font-bold mt-10">
                     {"What You'll Find Here"}
                 </h2>
-                <div className="text-base lg:text-lg leading-relaxed mt-4 text-justify max-w-4xl">
+                <div className="text-base lg:text-lg leading-relaxed mt-4 max-w-4xl">
                     {"On GurruDawcs, you'll find documentation for:"}
                     <ul className="list-disc list-inside mt-4">
                         <li>
@@ -83,7 +83,7 @@ export default function About() {
                 <h2 className="text-2xl lg:text-2xl font-bold mt-10">
                     Who is Behind GurruDawcs?
                 </h2>
-                <p className="text-base lg:text-lg leading-relaxed mt-4 text-justify max-w-4xl">
+                <p className="text-base lg:text-lg leading-relaxed mt-4  max-w-4xl">
                     {"I'm"} <strong>Ashutosh Pawar</strong>,{" "}
                     {`a passionate developer
                 with experience in building web applications and creating
@@ -96,7 +96,7 @@ export default function About() {
                 <h2 className="text-2xl lg:text-2xl font-bold mt-10">
                     Get Started
                 </h2>
-                <p className="text-base lg:text-lg leading-relaxed mt-4 text-justify max-w-4xl">
+                <p className="text-base lg:text-lg leading-relaxed mt-4  max-w-4xl">
                     Explore the documentation, contribute, or simply get
                     inspired by the tools available on GurruDawcs. Happy coding!
                 </p>
