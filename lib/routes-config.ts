@@ -1,5 +1,4 @@
 // for page navigation & to sort on leftbar
-
 export type EachRoute = {
     title: string;
     href: string;
@@ -59,6 +58,47 @@ export const ROUTES: EachRoute[] = [
             { title: "FAQ", href: "/faq" },
         ],
     },
+    /*{
+        title: "Templates",
+        href: "/template",
+        noLink: true,
+        items: [
+            { title: "Introduction", href: "/introduction" },
+            {
+                title: "Installation",
+                href: "/installation",
+                items: [
+                    { title: "Laravel", href: "/laravel" },
+                    { title: "React", href: "/react" },
+                    { title: "Gatsby", href: "/gatsby" },
+                ],
+            },
+            { title: "Quick Start Guide", href: "/quick-start-guide" },
+            {
+                title: "Project Structure",
+                href: "/project-structure",
+                items: [
+                    { title: "Layouts", href: "/layouts" },
+                    { title: "Integrations", href: "/integrations" },
+                    {
+                        title: "Manual",
+                        href: "/manual",
+                        items: [
+                            { title: "JavaScript", href: "/javascript" },
+                            { title: "Typescript", href: "/typescript" },
+                            { title: "Golang", href: "/golang" },
+                        ],
+                    },
+                ],
+            },
+            { title: "Changelog", href: "/changelog" },
+            {
+                title: "FAQ",
+                href: "/faq",
+            },
+        ],
+    },
+    */
 ];
 
 type Page = { title: string; href: string };
