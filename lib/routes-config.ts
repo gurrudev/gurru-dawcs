@@ -58,6 +58,23 @@ export const ROUTES: EachRoute[] = [
             { title: "FAQ", href: "/faq" },
         ],
     },
+    {
+        title: "Utilities",
+        href: "/utilities",
+        noLink: true,
+        items: [
+            {
+                title: "Date Formats",
+                href: "/date-formats",
+                items: [
+                    {
+                        title: "Examples",
+                        href: "/custom-dates",
+                    },
+                ],
+            },
+        ],
+    },
     /*{
         title: "Templates",
         href: "/template",

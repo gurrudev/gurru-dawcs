@@ -1,0 +1,143 @@
+---
+title: Date Formats
+description: In JavaScript, date formats can vary depending on the region, use case, and how you want to display the date. Here are some common date formats and methods for displaying them
+---
+
+### ISO 8601 Format (Default)
+
+The default format in JavaScript for a date object is the ISO 8601 format: `YYYY-MM-DDTHH:mm:ss.sssZ`.
+
+```javascript
+const date = new Date();
+console.log(date.toISOString()); // "2024-11-08T08:00:00.000Z"
+```
+
+This format is widely used for date storage in databases and APIs.
+
+### Locale-Specific Date Formats
+
+JavaScript allows formatting dates according to the user's locale using the `toLocaleDateString()` method.
+
+```javascript
+const date = new Date();
+console.log(date.toLocaleDateString("en-US")); // "11/8/2024" (MM/DD/YYYY)
+console.log(date.toLocaleDateString("en-GB")); // "08/11/2024" (DD/MM/YYYY)
+console.log(date.toLocaleDateString("fr-FR")); // "08/11/2024" (DD/MM/YYYY)
+```
+
+You can also specify the options to customize the output.
+
+```javascript
+const options = { year: "numeric", month: "long", day: "numeric" };
+console.log(date.toLocaleDateString("en-US", options)); // "November 8, 2024"
+```
+
+### Custom Date Format (Manual Formatting)
+
+If you need a custom format, you can manually extract date components (year, month, day, etc.) using `Date` methods and construct a custom format.
+
+```javascript
+const date = new Date();
+const day = String(date.getDate()).padStart(2, "0");
+const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+const year = date.getFullYear();
+console.log(`${month}/${day}/${year}`); // "11/08/2024"
+```
+
+### Unix Timestamp
+
+A Unix timestamp is the number of milliseconds since January 1, 1970 (the Unix epoch). You can get this using `Date.now()` or `getTime()`.
+
+```javascript
+const timestamp = Date.now();
+console.log(timestamp); // 1636774747418 (milliseconds)
+```
+
+If you need a Unix timestamp in seconds, divide the result by 1000.
+
+```javascript
+const unixTimestampInSeconds = Math.floor(Date.now() / 1000);
+console.log(unixTimestampInSeconds); // 1636774747 (seconds)
+```
+
+### UTC Format
+
+You can also format dates in **UTC** using `toUTCString()`.
+
+```javascript
+const date = new Date();
+console.log(date.toUTCString()); // "Fri, 08 Nov 2024 08:00:00 GMT"
+```
+
+### Custom Time Format
+
+For custom time formats (e.g., `HH:mm:ss`), you can use the `getHours()`, `getMinutes()`, and `getSeconds()` methods.
+
+```javascript
+const date = new Date();
+const hours = String(date.getHours()).padStart(2, "0");
+const minutes = String(date.getMinutes()).padStart(2, "0");
+const seconds = String(date.getSeconds()).padStart(2, "0");
+console.log(`${hours}:${minutes}:${seconds}`); // "08:00:00"
+```
+
+### Using Libraries for More Advanced Formatting
+
+For more advanced or complex date formatting, libraries like **[date-fns](https://date-fns.org/)** or **[moment.js](https://momentjs.com/)** (though now deprecated) can help you with different custom formats easily.
+
+#### Example with date-fns:
+
+```javascript
+import { format } from "date-fns";
+const date = new Date();
+console.log(format(date, "yyyy-MM-dd HH:mm:ss")); // "2024-11-08 08:00:00"
+```
+
+#### Example with moment.js:
+
+```javascript
+const moment = require("moment");
+const date = moment();
+console.log(date.format("YYYY-MM-DD HH:mm:ss")); // "2024-11-08 08:00:00"
+```
+
+### RFC 2822 Format
+
+You can also convert the date to the **RFC 2822** format using `toString()` or `toUTCString()`.
+
+```javascript
+const date = new Date();
+console.log(date.toString()); // "Fri Nov 08 2024 08:00:00 GMT+0000 (Coordinated Universal Time)"
+```
+
+### Custom Full Date Format
+
+This format includes the full weekday name, month, and year, like `Day, Month Date, Year`.
+
+```javascript
+const date = new Date();
+const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+};
+console.log(date.toLocaleDateString("en-US", options)); // "Friday, November 8, 2024"
+```
+
+---
+
+### Summary of Common Date Formats
+
+| Format Type                            | Example                         | Code Example                                      |
+| -------------------------------------- | ------------------------------- | ------------------------------------------------- |
+| ISO 8601                               | `2024-11-08T08:00:00.000Z`      | `date.toISOString()`                              |
+| US Locale (MM/DD/YYYY)                 | `11/08/2024`                    | `date.toLocaleDateString('en-US')`                |
+| UK Locale (DD/MM/YYYY)                 | `08/11/2024`                    | `date.toLocaleDateString('en-GB')`                |
+| Custom (MM/DD/YYYY)                    | `11/08/2024`                    | `const format = '${month}/${day}/${year}'`        |
+| Unix Timestamp (milliseconds)          | `1636774747418`                 | `Date.now()`                                      |
+| UTC Format                             | `Fri, 08 Nov 2024 08:00:00 GMT` | `date.toUTCString()`                              |
+| Time Format (HH:mm:ss)                 | `08:00:00`                      | `const format = '${hours}:${minutes}:${seconds}'` |
+| Full Date Format (weekday, month, day) | `Friday, November 8, 2024`      | `date.toLocaleDateString('en-US', options)`       |
+
+These formats can be adapted further depending on your requirements.

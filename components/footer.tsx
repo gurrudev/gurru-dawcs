@@ -13,12 +13,12 @@ export function Footer() {
           <p className="text-center">
             Build by{" "}
             <Link
-              className="px-1"
+              className="px-1 text-orange-300"
               href="https://ashutoshpawar.live"
             >
-              @ashutosh
+              ASHUTOSH
             </Link>
-            . &copy; 2024 All Rights Reserved.
+            . &copy; 2024 GurruDawcs.
           </p>
         </div>
 
