@@ -1,0 +1,250 @@
+---
+title: Validation
+description: Common validators for emails, URLs, phone numbers, passwords, credit cards, and more. All return a boolean — drop them into any form or API handler.
+---
+
+### isEmail
+
+```javascript
+const isEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+isEmail("user@example.com");     // true
+isEmail("user.name+tag@co.uk"); // true
+isEmail("not-an-email");        // false
+isEmail("missing@domain");      // false
+```
+
+---
+
+### isURL
+
+```javascript
+const isURL = (url) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+isURL("https://example.com");       // true
+isURL("http://localhost:3000/api"); // true
+isURL("just some text");           // false
+```
+
+---
+
+### isPhone
+
+Validates common international phone formats.
+
+```javascript
+const isPhone = (phone) =>
+  /^\+?[\d\s\-().]{7,15}$/.test(phone);
+
+isPhone("+1 (555) 123-4567"); // true
+isPhone("+91 9876543210");    // true
+isPhone("555-1234");          // true
+isPhone("abc");               // false
+```
+
+---
+
+### isStrongPassword
+
+Password must be 8+ chars with uppercase, lowercase, number, and special char.
+
+```javascript
+const isStrongPassword = (password) =>
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
+
+isStrongPassword("Passw0rd!");   // true
+isStrongPassword("password");    // false (no uppercase, number, or special char)
+isStrongPassword("PASSWORD1!");  // false (no lowercase)
+isStrongPassword("Pass1!");      // false (too short)
+```
+
+#### Password strength score (0–4)
+
+```javascript
+const passwordStrength = (password) => {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[\W_]/.test(password)) score++;
+  return score; // 0 = very weak, 4-5 = strong
+};
+
+passwordStrength("hello");       // 1
+passwordStrength("Hello1");      // 3
+passwordStrength("Hello1!");     // 4
+passwordStrength("Hello1!xyz");  // 5
+```
+
+---
+
+### isCreditCard
+
+Validates credit card numbers using the Luhn algorithm.
+
+```javascript
+const isCreditCard = (number) => {
+  const cleaned = number.replace(/\D/g, "");
+  if (cleaned.length < 13 || cleaned.length > 19) return false;
+  let sum = 0;
+  let isEven = false;
+  for (let i = cleaned.length - 1; i >= 0; i--) {
+    let digit = parseInt(cleaned[i], 10);
+    if (isEven) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    isEven = !isEven;
+  }
+  return sum % 10 === 0;
+};
+
+isCreditCard("4532015112830366"); // true (Visa test number)
+isCreditCard("1234567890123456"); // false
+isCreditCard("4532 0151 1283 0366"); // true (spaces ok)
+```
+
+---
+
+### isDate
+
+Check if a value is a valid date.
+
+```javascript
+const isDate = (value) => {
+  const date = new Date(value);
+  return !isNaN(date.getTime());
+};
+
+isDate("2024-11-08");          // true
+isDate("November 8, 2024");   // true
+isDate("not a date");         // false
+isDate(new Date());           // true
+```
+
+---
+
+### isInteger
+
+```javascript
+const isInteger = (value) => Number.isInteger(Number(value));
+
+isInteger(42);      // true
+isInteger("42");    // true
+isInteger(3.14);    // false
+isInteger("3.14");  // false
+```
+
+---
+
+### isAlpha
+
+Only alphabetic characters (no numbers or symbols).
+
+```javascript
+const isAlpha = (str) => /^[a-zA-Z]+$/.test(str);
+
+isAlpha("Hello");   // true
+isAlpha("Hello1");  // false
+isAlpha("Hi!");     // false
+```
+
+---
+
+### isAlphanumeric
+
+Only letters and numbers.
+
+```javascript
+const isAlphanumeric = (str) => /^[a-zA-Z0-9]+$/.test(str);
+
+isAlphanumeric("Hello123"); // true
+isAlphanumeric("Hello!");   // false
+```
+
+---
+
+### isHexColor
+
+```javascript
+const isHexColor = (color) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color);
+
+isHexColor("#fff");    // true
+isHexColor("#ffffff"); // true
+isHexColor("#AABBCC"); // true
+isHexColor("fff");     // false (missing #)
+isHexColor("#12345");  // false (wrong length)
+```
+
+---
+
+### isIPv4
+
+```javascript
+const isIPv4 = (ip) =>
+  /^(25[0-5]|2[0-4]\d|[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/.test(ip);
+
+isIPv4("192.168.1.1");  // true
+isIPv4("255.255.255.0"); // true
+isIPv4("999.1.1.1");    // false
+isIPv4("192.168.1");    // false
+```
+
+---
+
+### isUUID
+
+```javascript
+const isUUID = (str) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+
+isUUID("550e8400-e29b-41d4-a716-446655440000"); // true
+isUUID("not-a-uuid");                           // false
+```
+
+---
+
+### isJSON
+
+```javascript
+const isJSON = (str) => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+isJSON('{"key":"value"}'); // true
+isJSON("[1, 2, 3]");       // true
+isJSON("not json");        // false
+```
+
+---
+
+### Summary
+
+| Validator | What it checks |
+|---|---|
+| `isEmail` | Valid email format |
+| `isURL` | Valid URL (any protocol) |
+| `isPhone` | International phone numbers |
+| `isStrongPassword` | 8+ chars, mixed case, number, symbol |
+| `passwordStrength` | Returns 0–5 score |
+| `isCreditCard` | Luhn algorithm check |
+| `isDate` | Parseable date string or object |
+| `isHexColor` | 3 or 6 digit hex color |
+| `isIPv4` | Valid IPv4 address |
+| `isUUID` | RFC 4122 UUID format |
+| `isJSON` | Valid JSON string |

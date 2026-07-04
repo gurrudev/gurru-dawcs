@@ -1,0 +1,222 @@
+---
+title: Regex Patterns
+description: The most commonly Googled regex patterns in one place. Test them, copy them, use them. Covers email, URL, phone, password, IP, credit card, dates, and more.
+---
+
+### Email
+
+```javascript
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+EMAIL.test("user@example.com");      // true
+EMAIL.test("user.name+tag@co.uk");  // true
+EMAIL.test("no-at-sign");           // false
+```
+
+---
+
+### URL
+
+```javascript
+// Matches http/https URLs
+const URL_PATTERN = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
+URL_PATTERN.test("https://example.com");          // true
+URL_PATTERN.test("http://sub.domain.co/path?q=1"); // true
+URL_PATTERN.test("not a url");                    // false
+```
+
+---
+
+### Phone Numbers
+
+```javascript
+// International format (+1 555 123 4567, +91-9876543210, etc.)
+const PHONE_INTL = /^\+?[\d\s\-().]{7,15}$/;
+
+// US format only (555-123-4567 / (555) 123-4567)
+const PHONE_US = /^(\+1\s?)?(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})$/;
+
+PHONE_INTL.test("+1 (555) 123-4567"); // true
+PHONE_US.test("(555) 123-4567");      // true
+PHONE_US.test("555.123.4567");        // true
+```
+
+---
+
+### Password Strength
+
+```javascript
+// At least 8 chars: uppercase, lowercase, digit, special character
+const STRONG_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+// At least 6 chars: letter and number
+const MEDIUM_PASSWORD = /^(?=.*[a-zA-Z])(?=.*\d).{6,}$/;
+
+STRONG_PASSWORD.test("Passw0rd!"); // true
+MEDIUM_PASSWORD.test("pass12");    // true
+```
+
+---
+
+### Credit Card Numbers
+
+```javascript
+// Generic 13–19 digit card number (with optional spaces/dashes)
+const CREDIT_CARD = /^[\d\s\-]{13,19}$/;
+
+// Specific card types
+const VISA       = /^4[\d]{12}(?:[\d]{3})?$/;
+const MASTERCARD = /^5[1-5][\d]{14}$/;
+const AMEX       = /^3[47][\d]{13}$/;
+
+VISA.test("4532015112830366");  // true
+AMEX.test("378282246310005");  // true
+```
+
+---
+
+### IP Addresses
+
+```javascript
+// IPv4
+const IPV4 = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/;
+
+// IPv6 (simplified)
+const IPV6 = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+
+IPV4.test("192.168.1.1");  // true
+IPV4.test("999.1.1.1");   // false
+```
+
+---
+
+### Hex Color
+
+```javascript
+// 3 or 6 digit hex color
+const HEX_COLOR = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
+// With or without #
+const HEX_COLOR_OPT = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
+HEX_COLOR.test("#fff");     // true
+HEX_COLOR.test("#1a2b3c"); // true
+HEX_COLOR.test("fff");     // false
+```
+
+---
+
+### Date Formats
+
+```javascript
+// YYYY-MM-DD
+const DATE_ISO = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+// DD/MM/YYYY or DD-MM-YYYY
+const DATE_DMY = /^(0[1-9]|[12]\d|3[01])[/\-](0[1-9]|1[0-2])[/\-]\d{4}$/;
+
+// MM/DD/YYYY
+const DATE_MDY = /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/;
+
+DATE_ISO.test("2024-11-08"); // true
+DATE_DMY.test("08/11/2024"); // true
+DATE_MDY.test("11/08/2024"); // true
+```
+
+---
+
+### UUID
+
+```javascript
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+UUID.test("550e8400-e29b-41d4-a716-446655440000"); // true
+UUID.test("not-a-uuid");                           // false
+```
+
+---
+
+### Slug
+
+```javascript
+// URL-safe slug: lowercase letters, numbers, hyphens
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+SLUG.test("hello-world");   // true
+SLUG.test("my-post-2024");  // true
+SLUG.test("Hello World");   // false
+SLUG.test("--double--");    // false
+```
+
+---
+
+### Username
+
+```javascript
+// 3–20 chars, letters/numbers/underscores/hyphens, must start with a letter
+const USERNAME = /^[a-zA-Z][a-zA-Z0-9_-]{2,19}$/;
+
+USERNAME.test("john_doe");   // true
+USERNAME.test("alice123");   // true
+USERNAME.test("1startNum"); // false
+USERNAME.test("ab");         // false (too short)
+```
+
+---
+
+### Postal Codes
+
+```javascript
+const ZIP_US    = /^\d{5}(-\d{4})?$/;             // US: 12345 or 12345-6789
+const POSTAL_CA = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/; // Canada: A1B 2C3
+const POSTAL_UK = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;   // UK: SW1A 2AA
+
+ZIP_US.test("12345");       // true
+ZIP_US.test("12345-6789");  // true
+POSTAL_CA.test("A1B 2C3"); // true
+```
+
+---
+
+### HTML Tags
+
+```javascript
+// Match any HTML tag
+const HTML_TAG = /<[^>]*>/g;
+
+// Strip all tags
+"<h1>Hello</h1> <p>World</p>".replace(HTML_TAG, ""); // "Hello World"
+```
+
+---
+
+### Numbers
+
+```javascript
+const INTEGER       = /^-?\d+$/;
+const FLOAT         = /^-?\d+(\.\d+)?$/;
+const POSITIVE_INT  = /^\d+$/;
+const COMMA_NUMBER  = /^-?\d{1,3}(,\d{3})*(\.\d+)?$/;
+
+INTEGER.test("-42");          // true
+FLOAT.test("3.14");           // true
+COMMA_NUMBER.test("1,234.56"); // true
+```
+
+---
+
+### Quick Reference Table
+
+| Pattern | Regex |
+|---|---|
+| Email | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` |
+| Strong Password | `/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/` |
+| IPv4 | `/^(25[0-5]\|2[0-4]\d\|[01]?\d\d?)(\.(25[0-5]\|2[0-4]\d\|[01]?\d\d?)){3}$/` |
+| Hex Color | `/^#([0-9A-Fa-f]{3}\|[0-9A-Fa-f]{6})$/` |
+| UUID | `/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i` |
+| Date ISO | `/^\d{4}-(0[1-9]\|1[0-2])-(0[1-9]\|[12]\d\|3[01])$/` |
+| Slug | `/^[a-z0-9]+(?:-[a-z0-9]+)*$/` |
+| US Zip | `/^\d{5}(-\d{4})?$/` |
+| Integer | `/^-?\d+$/` |
+| Float | `/^-?\d+(\.\d+)?$/` |

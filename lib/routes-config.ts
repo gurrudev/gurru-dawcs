@@ -8,47 +8,7 @@ export type EachRoute = {
 
 export const ROUTES: EachRoute[] = [
     {
-        title: "Getting Started",
-        href: "/getting-started",
-        noLink: true,
-        items: [
-            { title: "Introduction", href: "/introduction" },
-            {
-                title: "Installation",
-                href: "/installation",
-                items: [
-                    { title: "Laravel", href: "/laravel" },
-                    { title: "React", href: "/react" },
-                    { title: "Gatsby", href: "/gatsby" },
-                ],
-            },
-            { title: "Quick Start Guide", href: "/quick-start-guide" },
-            {
-                title: "Project Structure",
-                href: "/project-structure",
-                items: [
-                    { title: "Layouts", href: "/layouts" },
-                    { title: "Integrations", href: "/integrations" },
-                    {
-                        title: "Manual",
-                        href: "/manual",
-                        items: [
-                            { title: "JavaScript", href: "/javascript" },
-                            { title: "Typescript", href: "/typescript" },
-                            { title: "Golang", href: "/golang" },
-                        ],
-                    },
-                ],
-            },
-            { title: "Changelog", href: "/changelog" },
-            {
-                title: "FAQ",
-                href: "/faq",
-            },
-        ],
-    },
-    {
-        title: "String Utility Ts",
+        title: "String Utility TS",
         href: "/string-utility-ts",
         noLink: true,
         items: [
@@ -67,55 +27,27 @@ export const ROUTES: EachRoute[] = [
                 title: "Date Formats",
                 href: "/date-formats",
                 items: [
-                    {
-                        title: "Examples",
-                        href: "/custom-dates",
-                    },
+                    { title: "Examples", href: "/custom-dates" },
                 ],
             },
+            { title: "String Utilities", href: "/string-utilities" },
+            { title: "Array Utilities", href: "/array-utilities" },
+            { title: "Object Utilities", href: "/object-utilities" },
+            { title: "Number Utilities", href: "/number-utilities" },
+            { title: "URL Utilities", href: "/url-utilities" },
+            { title: "Validation", href: "/validation" },
+            { title: "Regex Patterns", href: "/regex-patterns" },
+            { title: "Color Utilities", href: "/color-utilities" },
+            { title: "Browser & Timing", href: "/browser-utilities" },
+            { title: "TypeScript Snippets", href: "/typescript-snippets" },
+            { title: "Promise & Async", href: "/promise-async" },
+            { title: "Relative Time", href: "/relative-time" },
+            { title: "Function Utilities", href: "/function-utilities" },
+            { title: "Math Utilities", href: "/math-utilities" },
+            { title: "File Utilities", href: "/file-utilities" },
+            { title: "Keyboard & Events", href: "/keyboard-events" },
         ],
     },
-    /*{
-        title: "Templates",
-        href: "/template",
-        noLink: true,
-        items: [
-            { title: "Introduction", href: "/introduction" },
-            {
-                title: "Installation",
-                href: "/installation",
-                items: [
-                    { title: "Laravel", href: "/laravel" },
-                    { title: "React", href: "/react" },
-                    { title: "Gatsby", href: "/gatsby" },
-                ],
-            },
-            { title: "Quick Start Guide", href: "/quick-start-guide" },
-            {
-                title: "Project Structure",
-                href: "/project-structure",
-                items: [
-                    { title: "Layouts", href: "/layouts" },
-                    { title: "Integrations", href: "/integrations" },
-                    {
-                        title: "Manual",
-                        href: "/manual",
-                        items: [
-                            { title: "JavaScript", href: "/javascript" },
-                            { title: "Typescript", href: "/typescript" },
-                            { title: "Golang", href: "/golang" },
-                        ],
-                    },
-                ],
-            },
-            { title: "Changelog", href: "/changelog" },
-            {
-                title: "FAQ",
-                href: "/faq",
-            },
-        ],
-    },
-    */
 ];
 
 type Page = { title: string; href: string };

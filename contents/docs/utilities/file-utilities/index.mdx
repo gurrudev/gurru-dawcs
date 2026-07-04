@@ -1,0 +1,240 @@
+---
+title: File Utilities
+description: Download files, read files in the browser, convert to Base64, detect MIME types, and other file-handling snippets developers constantly look up.
+---
+
+### downloadFile
+
+Trigger a file download in the browser from a URL or blob.
+
+```javascript
+// Download from a URL
+const downloadFromUrl = (url, filename) => {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || url.split("/").pop();
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+downloadFromUrl("https://example.com/report.pdf", "report.pdf");
+```
+
+```javascript
+// Download a string as a text file
+const downloadText = (content, filename = "file.txt", type = "text/plain") => {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  downloadFromUrl(url, filename);
+  URL.revokeObjectURL(url);
+};
+
+downloadText("Hello, World!", "hello.txt");
+downloadText(JSON.stringify(data, null, 2), "data.json", "application/json");
+downloadText("<h1>Hi</h1>", "page.html", "text/html");
+```
+
+---
+
+### downloadCSV
+
+Convert an array of objects to a CSV file and download it.
+
+```javascript
+const downloadCSV = (data, filename = "export.csv") => {
+  if (!data.length) return;
+  const headers = Object.keys(data[0]);
+  const rows = data.map((row) =>
+    headers.map((h) => JSON.stringify(row[h] ?? "")).join(",")
+  );
+  const csv = [headers.join(","), ...rows].join("\n");
+  downloadText(csv, filename, "text/csv;charset=utf-8;");
+};
+
+downloadCSV([
+  { name: "Alice", age: 30, city: "New York" },
+  { name: "Bob",   age: 25, city: "London" },
+], "users.csv");
+```
+
+---
+
+### readFileAsText
+
+Read a `File` (from an `<input type="file">`) as a text string.
+
+```javascript
+const readFileAsText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = (e) => resolve(e.target.result);
+    reader.onerror = (e) => reject(new Error("Failed to read file"));
+    reader.readAsText(file);
+  });
+
+// Usage
+input.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  const content = await readFileAsText(file);
+  console.log(content); // full text content
+});
+```
+
+---
+
+### readFileAsDataURL
+
+Read a file as a Base64 data URL (for previewing images before upload).
+
+```javascript
+const readFileAsDataURL = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+
+// Image preview before upload
+input.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  const dataUrl = await readFileAsDataURL(file);
+  img.src = dataUrl; // instant preview
+});
+```
+
+---
+
+### fileToBase64
+
+Convert a File/Blob to a plain Base64 string (without the data: prefix).
+
+```javascript
+const fileToBase64 = async (file) => {
+  const dataUrl = await readFileAsDataURL(file);
+  return dataUrl.split(",")[1]; // strip "data:image/png;base64,"
+};
+
+const base64 = await fileToBase64(file);
+// "iVBORw0KGgoAAAANSUhEUgAA..."
+```
+
+---
+
+### base64ToBlob
+
+Convert a Base64 string back to a Blob.
+
+```javascript
+const base64ToBlob = (base64, mimeType = "application/octet-stream") => {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mimeType });
+};
+
+const blob = base64ToBlob(base64String, "image/png");
+const url = URL.createObjectURL(blob);
+img.src = url;
+```
+
+---
+
+### getMimeType
+
+Detect the MIME type from a file extension.
+
+```javascript
+const MIME_TYPES = {
+  // Images
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+  gif: "image/gif",  webp: "image/webp", svg: "image/svg+xml",
+  ico: "image/x-icon",
+  // Documents
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  // Text
+  txt: "text/plain", html: "text/html", css: "text/css",
+  js: "text/javascript", ts: "text/typescript",
+  json: "application/json", xml: "application/xml",
+  csv: "text/csv", md: "text/markdown",
+  // Archives
+  zip: "application/zip", tar: "application/x-tar",
+  gz: "application/gzip",
+  // Audio / Video
+  mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg",
+  mp4: "video/mp4", webm: "video/webm", avi: "video/x-msvideo",
+};
+
+const getMimeType = (filename) => {
+  const ext = filename.split(".").pop().toLowerCase();
+  return MIME_TYPES[ext] || "application/octet-stream";
+};
+
+getMimeType("photo.jpg");   // "image/jpeg"
+getMimeType("report.pdf");  // "application/pdf"
+getMimeType("data.json");   // "application/json"
+getMimeType("unknown.xyz"); // "application/octet-stream"
+```
+
+---
+
+### formatFileSize
+
+Convert bytes to a human-readable size.
+
+```javascript
+const formatFileSize = (bytes, decimals = 1) => {
+  if (bytes === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / 1024 ** i).toFixed(decimals)} ${units[i]}`;
+};
+
+formatFileSize(0);          // "0 B"
+formatFileSize(1500);       // "1.5 KB"
+formatFileSize(1048576);    // "1.0 MB"
+formatFileSize(1073741824); // "1.0 GB"
+```
+
+---
+
+### isImageFile / isVideoFile / isDocumentFile
+
+```javascript
+const IMAGE_EXTS    = new Set(["jpg","jpeg","png","gif","webp","svg","ico","bmp","tiff"]);
+const VIDEO_EXTS    = new Set(["mp4","webm","avi","mov","mkv","flv"]);
+const DOCUMENT_EXTS = new Set(["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","md"]);
+
+const getExt = (filename) => filename.split(".").pop().toLowerCase();
+
+const isImageFile    = (filename) => IMAGE_EXTS.has(getExt(filename));
+const isVideoFile    = (filename) => VIDEO_EXTS.has(getExt(filename));
+const isDocumentFile = (filename) => DOCUMENT_EXTS.has(getExt(filename));
+
+isImageFile("photo.jpg");    // true
+isVideoFile("clip.mp4");     // true
+isDocumentFile("notes.pdf"); // true
+isImageFile("data.json");    // false
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `downloadFromUrl(url, filename)` | Trigger download from any URL |
+| `downloadText(content, filename)` | Download string as file |
+| `downloadCSV(data, filename)` | Array of objects → CSV download |
+| `readFileAsText(file)` | File input → text string |
+| `readFileAsDataURL(file)` | File input → Base64 data URL |
+| `fileToBase64(file)` | File → raw Base64 string |
+| `base64ToBlob(base64, mimeType)` | Base64 → Blob |
+| `getMimeType(filename)` | Extension → MIME type |
+| `formatFileSize(bytes)` | `1048576` → `"1.0 MB"` |
+| `isImageFile / isVideoFile` | Boolean type checks by extension |

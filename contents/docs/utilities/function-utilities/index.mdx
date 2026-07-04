@@ -1,0 +1,242 @@
+---
+title: Function Utilities
+description: Pipe, compose, curry, partial application, and other functional programming helpers that make code more composable and reusable.
+---
+
+### pipe
+
+Apply a series of functions left-to-right, each receiving the result of the previous.
+
+```javascript
+const pipe = (...fns) => (value) => fns.reduce((acc, fn) => fn(acc), value);
+
+// Usage
+const process = pipe(
+  (x) => x * 2,        // 5 → 10
+  (x) => x + 3,        // 10 → 13
+  (x) => `Result: ${x}` // 13 → "Result: 13"
+);
+
+process(5); // "Result: 13"
+
+// Real-world example
+const formatUsername = pipe(
+  (s) => s.trim(),
+  (s) => s.toLowerCase(),
+  (s) => s.replace(/\s+/g, "_")
+);
+
+formatUsername("  Alice Bob  "); // "alice_bob"
+```
+
+---
+
+### compose
+
+Like `pipe` but applies functions right-to-left (math convention).
+
+```javascript
+const compose = (...fns) => (value) => fns.reduceRight((acc, fn) => fn(acc), value);
+
+const transform = compose(
+  (x) => `Result: ${x}`,
+  (x) => x + 3,
+  (x) => x * 2
+);
+
+transform(5); // "Result: 13"  — same result as pipe, opposite order
+```
+
+---
+
+### curry
+
+Transform a multi-argument function so it can be called one argument at a time.
+
+```javascript
+const curry = (fn) => {
+  const arity = fn.length;
+  return function curried(...args) {
+    if (args.length >= arity) return fn(...args);
+    return (...more) => curried(...args, ...more);
+  };
+};
+
+const add = curry((a, b, c) => a + b + c);
+
+add(1)(2)(3);    // 6
+add(1, 2)(3);    // 6
+add(1)(2, 3);    // 6
+add(1, 2, 3);    // 6
+
+// Useful for creating reusable partial functions
+const add10 = add(10);
+const add10and5 = add10(5);
+add10and5(3); // 18
+```
+
+---
+
+### partial
+
+Pre-fill some arguments of a function, returning a new function for the rest.
+
+```javascript
+const partial = (fn, ...presetArgs) =>
+  (...laterArgs) => fn(...presetArgs, ...laterArgs);
+
+const multiply = (a, b) => a * b;
+const double = partial(multiply, 2);
+const triple = partial(multiply, 3);
+
+double(5); // 10
+triple(5); // 15
+
+// Real-world: pre-configure a fetch call
+const fetchJSON = (baseUrl, path) =>
+  fetch(`${baseUrl}${path}`).then((r) => r.json());
+
+const fetchFromApi = partial(fetchJSON, "https://api.example.com");
+fetchFromApi("/users");  // GET https://api.example.com/users
+fetchFromApi("/posts");  // GET https://api.example.com/posts
+```
+
+---
+
+### once
+
+Ensure a function runs exactly once. Subsequent calls return the cached result.
+
+```javascript
+const once = (fn) => {
+  let called = false, result;
+  return (...args) => {
+    if (!called) { called = true; result = fn(...args); }
+    return result;
+  };
+};
+
+const initDB = once(() => {
+  console.log("Connecting to DB...");
+  return { connected: true };
+});
+
+initDB(); // "Connecting to DB..." → { connected: true }
+initDB(); // { connected: true }  (no log — not called again)
+initDB(); // { connected: true }
+```
+
+---
+
+### memoize
+
+Cache the results of a pure function based on its arguments.
+
+```javascript
+const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
+};
+
+const fibonacci = memoize((n) => {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+});
+
+fibonacci(40); // fast — previously expensive recursive calls are cached
+```
+
+---
+
+### noop
+
+A function that does nothing. Useful as a default prop or callback placeholder.
+
+```javascript
+const noop = () => {};
+
+// Usage: default no-op callback to avoid null checks
+function Button({ onClick = noop }) {
+  return `<button onclick="${onClick}">Click</button>`;
+}
+```
+
+---
+
+### identity
+
+Returns its first argument unchanged. Useful as a default transform.
+
+```javascript
+const identity = (x) => x;
+
+const transform = process.env.DEBUG ? (x) => { console.log(x); return x; } : identity;
+const result = [1, 2, 3].map(identity); // [1, 2, 3]
+```
+
+---
+
+### trampoline
+
+Run deeply recursive functions without blowing the call stack.
+
+```javascript
+const trampoline = (fn) =>
+  (...args) => {
+    let result = fn(...args);
+    while (typeof result === "function") result = result();
+    return result;
+  };
+
+// Normal recursion: stack overflows at ~10000 depth
+// With trampoline: safely handles millions of iterations
+const sumTo = trampoline(function sum(n, acc = 0) {
+  if (n === 0) return acc;
+  return () => sum(n - 1, acc + n); // return a thunk instead of recursing
+});
+
+sumTo(100000); // 5000050000 — no stack overflow
+```
+
+---
+
+### flip
+
+Reverse the argument order of a two-argument function.
+
+```javascript
+const flip = (fn) => (a, b) => fn(b, a);
+
+const subtract = (a, b) => a - b;
+const subtractFrom = flip(subtract);
+
+subtract(10, 3);     // 7  (10 - 3)
+subtractFrom(10, 3); // -7 (3 - 10)
+
+// Useful with higher-order functions
+const divideBy = flip((divisor, n) => n / divisor);
+[10, 20, 30].map(divideBy(5)); // [2, 4, 6]  (each / 5)
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `pipe(...fns)` | Left-to-right function composition |
+| `compose(...fns)` | Right-to-left function composition |
+| `curry(fn)` | One argument at a time |
+| `partial(fn, ...args)` | Pre-fill arguments |
+| `once(fn)` | Run exactly one time |
+| `memoize(fn)` | Cache results by arguments |
+| `noop` | Do-nothing placeholder function |
+| `identity` | Return the first argument unchanged |
+| `trampoline(fn)` | Stack-safe deep recursion |
+| `flip(fn)` | Reverse argument order |

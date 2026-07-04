@@ -1,0 +1,266 @@
+---
+title: Array Utilities
+description: Essential array manipulation functions developers search for constantly. Deduplication, chunking, grouping, flattening, and more — all copy-paste ready.
+---
+
+### unique
+
+Remove duplicate values from an array.
+
+```javascript
+const unique = (arr) => [...new Set(arr)];
+
+unique([1, 2, 2, 3, 3, 4]);       // [1, 2, 3, 4]
+unique(["a", "b", "a", "c"]);     // ["a", "b", "c"]
+```
+
+#### Unique by a key (objects)
+
+```javascript
+const uniqueBy = (arr, key) =>
+  [...new Map(arr.map((item) => [item[key], item])).values()];
+
+const users = [
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+  { id: 1, name: "Alice Duplicate" },
+];
+uniqueBy(users, "id");
+// [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }]
+```
+
+---
+
+### chunk
+
+Split an array into chunks of a given size.
+
+```javascript
+const chunk = (arr, size) =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+
+chunk([1, 2, 3, 4, 5], 2); // [[1, 2], [3, 4], [5]]
+chunk([1, 2, 3, 4, 5], 3); // [[1, 2, 3], [4, 5]]
+```
+
+---
+
+### flatten
+
+Flatten a nested array by one level (or deeply).
+
+```javascript
+// One level
+const flatten = (arr) => arr.flat();
+
+// Deep flatten (all levels)
+const flattenDeep = (arr) => arr.flat(Infinity);
+
+flatten([[1, 2], [3, 4], [5]]);           // [1, 2, 3, 4, 5]
+flattenDeep([1, [2, [3, [4]]]]); // [1, 2, 3, 4]
+```
+
+---
+
+### groupBy
+
+Group array elements by a key or transform function.
+
+```javascript
+const groupBy = (arr, key) =>
+  arr.reduce((acc, item) => {
+    const group = typeof key === "function" ? key(item) : item[key];
+    acc[group] = acc[group] ?? [];
+    acc[group].push(item);
+    return acc;
+  }, {});
+
+const people = [
+  { name: "Alice", dept: "Engineering" },
+  { name: "Bob",   dept: "Design" },
+  { name: "Carol", dept: "Engineering" },
+];
+groupBy(people, "dept");
+// {
+//   Engineering: [{ name: "Alice", ... }, { name: "Carol", ... }],
+//   Design:      [{ name: "Bob", ... }]
+// }
+
+groupBy([1, 2, 3, 4, 5, 6], (n) => (n % 2 === 0 ? "even" : "odd"));
+// { odd: [1, 3, 5], even: [2, 4, 6] }
+```
+
+---
+
+### shuffle
+
+Randomly shuffle an array (Fisher-Yates algorithm).
+
+```javascript
+const shuffle = (arr) => {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
+shuffle([1, 2, 3, 4, 5]); // [3, 1, 5, 2, 4] (random)
+```
+
+---
+
+### intersection
+
+Find values that exist in both arrays.
+
+```javascript
+const intersection = (a, b) => a.filter((x) => b.includes(x));
+
+intersection([1, 2, 3], [2, 3, 4]); // [2, 3]
+intersection(["a", "b"], ["b", "c"]); // ["b"]
+```
+
+---
+
+### difference
+
+Find values in the first array that are NOT in the second.
+
+```javascript
+const difference = (a, b) => a.filter((x) => !b.includes(x));
+
+difference([1, 2, 3, 4], [2, 4]); // [1, 3]
+difference(["a", "b", "c"], ["b"]); // ["a", "c"]
+```
+
+---
+
+### sum / average
+
+Sum or average the values in an array.
+
+```javascript
+const sum = (arr) => arr.reduce((acc, n) => acc + n, 0);
+const average = (arr) => sum(arr) / arr.length;
+
+sum([1, 2, 3, 4, 5]);     // 15
+average([1, 2, 3, 4, 5]); // 3
+```
+
+---
+
+### min / max
+
+Get the minimum or maximum value from an array.
+
+```javascript
+const min = (arr) => Math.min(...arr);
+const max = (arr) => Math.max(...arr);
+
+min([3, 1, 4, 1, 5, 9]); // 1
+max([3, 1, 4, 1, 5, 9]); // 9
+```
+
+---
+
+### sortBy
+
+Sort an array of objects by a key.
+
+```javascript
+const sortBy = (arr, key, order = "asc") =>
+  [...arr].sort((a, b) =>
+    order === "asc" ? (a[key] > b[key] ? 1 : -1) : (a[key] < b[key] ? 1 : -1)
+  );
+
+const products = [
+  { name: "Banana", price: 0.5 },
+  { name: "Apple",  price: 1.2 },
+  { name: "Cherry", price: 3.0 },
+];
+
+sortBy(products, "price");          // Banana, Apple, Cherry
+sortBy(products, "price", "desc"); // Cherry, Apple, Banana
+```
+
+---
+
+### countBy
+
+Count how many elements match a condition.
+
+```javascript
+const countBy = (arr, fn) => arr.filter(fn).length;
+
+countBy([1, 2, 3, 4, 5, 6], (n) => n % 2 === 0); // 3 (even numbers)
+countBy(["a", "bb", "ccc"], (s) => s.length > 1); // 2
+```
+
+---
+
+### zip
+
+Combine two arrays into an array of pairs.
+
+```javascript
+const zip = (a, b) => a.map((item, i) => [item, b[i]]);
+
+zip(["a", "b", "c"], [1, 2, 3]); // [["a", 1], ["b", 2], ["c", 3]]
+```
+
+---
+
+### range
+
+Generate an array of numbers in a range.
+
+```javascript
+const range = (start, end, step = 1) =>
+  Array.from(
+    { length: Math.ceil((end - start) / step) },
+    (_, i) => start + i * step
+  );
+
+range(0, 5);       // [0, 1, 2, 3, 4]
+range(1, 10, 2);   // [1, 3, 5, 7, 9]
+range(0, 1, 0.25); // [0, 0.25, 0.5, 0.75]
+```
+
+---
+
+### last / first
+
+Get the first or last element(s) of an array.
+
+```javascript
+const first = (arr, n = 1) => (n === 1 ? arr[0] : arr.slice(0, n));
+const last  = (arr, n = 1) => (n === 1 ? arr[arr.length - 1] : arr.slice(-n));
+
+first([1, 2, 3]);    // 1
+first([1, 2, 3], 2); // [1, 2]
+last([1, 2, 3]);     // 3
+last([1, 2, 3], 2);  // [2, 3]
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `unique` | Remove duplicates |
+| `uniqueBy(arr, key)` | Remove duplicate objects by key |
+| `chunk(arr, size)` | Split into equal-sized chunks |
+| `flatten / flattenDeep` | Flatten nested arrays |
+| `groupBy(arr, key)` | Group objects by a property |
+| `shuffle` | Random order (Fisher-Yates) |
+| `intersection(a, b)` | Values in both arrays |
+| `difference(a, b)` | Values in `a` but not `b` |
+| `sum / average` | Numeric aggregation |
+| `sortBy(arr, key)` | Sort objects by property |
+| `range(start, end)` | Generate number sequence |
+| `zip(a, b)` | Pair two arrays |

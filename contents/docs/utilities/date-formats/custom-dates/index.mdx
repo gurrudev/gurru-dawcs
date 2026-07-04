@@ -1,143 +1,236 @@
 ---
-title: Date Formats
-description: In JavaScript, date formats can vary depending on the region, use case, and how you want to display the date. Here are some common date formats and methods for displaying them
+title: Custom Date Examples
+description: Practical recipes for building custom date formatters — display dates exactly the way your UI needs them, without a library.
 ---
 
-### ISO 8601 Format (Default)
+### Build a reusable formatter function
 
-The default format in JavaScript for a date object is the ISO 8601 format: `YYYY-MM-DDTHH:mm:ss.sssZ`.
-
-```javascript
-const date = new Date();
-console.log(date.toISOString()); // "2024-11-08T08:00:00.000Z"
-```
-
-This format is widely used for date storage in databases and APIs.
-
-### Locale-Specific Date Formats
-
-JavaScript allows formatting dates according to the user's locale using the `toLocaleDateString()` method.
+A single helper that converts any `Date` into any string pattern using tokens.
 
 ```javascript
-const date = new Date();
-console.log(date.toLocaleDateString("en-US")); // "11/8/2024" (MM/DD/YYYY)
-console.log(date.toLocaleDateString("en-GB")); // "08/11/2024" (DD/MM/YYYY)
-console.log(date.toLocaleDateString("fr-FR")); // "08/11/2024" (DD/MM/YYYY)
-```
+const formatDate = (date, pattern) => {
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, "0");
 
-You can also specify the options to customize the output.
+  const tokens = {
+    YYYY: d.getFullYear(),
+    YY:   String(d.getFullYear()).slice(-2),
+    MM:   pad(d.getMonth() + 1),
+    M:    d.getMonth() + 1,
+    DD:   pad(d.getDate()),
+    D:    d.getDate(),
+    HH:   pad(d.getHours()),
+    H:    d.getHours(),
+    mm:   pad(d.getMinutes()),
+    ss:   pad(d.getSeconds()),
+  };
 
-```javascript
-const options = { year: "numeric", month: "long", day: "numeric" };
-console.log(date.toLocaleDateString("en-US", options)); // "November 8, 2024"
-```
-
-### Custom Date Format (Manual Formatting)
-
-If you need a custom format, you can manually extract date components (year, month, day, etc.) using `Date` methods and construct a custom format.
-
-```javascript
-const date = new Date();
-const day = String(date.getDate()).padStart(2, "0");
-const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-const year = date.getFullYear();
-console.log(`${month}/${day}/${year}`); // "11/08/2024"
-```
-
-### Unix Timestamp
-
-A Unix timestamp is the number of milliseconds since January 1, 1970 (the Unix epoch). You can get this using `Date.now()` or `getTime()`.
-
-```javascript
-const timestamp = Date.now();
-console.log(timestamp); // 1636774747418 (milliseconds)
-```
-
-If you need a Unix timestamp in seconds, divide the result by 1000.
-
-```javascript
-const unixTimestampInSeconds = Math.floor(Date.now() / 1000);
-console.log(unixTimestampInSeconds); // 1636774747 (seconds)
-```
-
-### UTC Format
-
-You can also format dates in **UTC** using `toUTCString()`.
-
-```javascript
-const date = new Date();
-console.log(date.toUTCString()); // "Fri, 08 Nov 2024 08:00:00 GMT"
-```
-
-### Custom Time Format
-
-For custom time formats (e.g., `HH:mm:ss`), you can use the `getHours()`, `getMinutes()`, and `getSeconds()` methods.
-
-```javascript
-const date = new Date();
-const hours = String(date.getHours()).padStart(2, "0");
-const minutes = String(date.getMinutes()).padStart(2, "0");
-const seconds = String(date.getSeconds()).padStart(2, "0");
-console.log(`${hours}:${minutes}:${seconds}`); // "08:00:00"
-```
-
-### Using Libraries for More Advanced Formatting
-
-For more advanced or complex date formatting, libraries like **[date-fns](https://date-fns.org/)** or **[moment.js](https://momentjs.com/)** (though now deprecated) can help you with different custom formats easily.
-
-#### Example with date-fns:
-
-```javascript
-import { format } from "date-fns";
-const date = new Date();
-console.log(format(date, "yyyy-MM-dd HH:mm:ss")); // "2024-11-08 08:00:00"
-```
-
-#### Example with moment.js:
-
-```javascript
-const moment = require("moment");
-const date = moment();
-console.log(date.format("YYYY-MM-DD HH:mm:ss")); // "2024-11-08 08:00:00"
-```
-
-### RFC 2822 Format
-
-You can also convert the date to the **RFC 2822** format using `toString()` or `toUTCString()`.
-
-```javascript
-const date = new Date();
-console.log(date.toString()); // "Fri Nov 08 2024 08:00:00 GMT+0000 (Coordinated Universal Time)"
-```
-
-### Custom Full Date Format
-
-This format includes the full weekday name, month, and year, like `Day, Month Date, Year`.
-
-```javascript
-const date = new Date();
-const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  return pattern.replace(/YYYY|YY|MM|M|DD|D|HH|H|mm|ss/g, (match) => tokens[match]);
 };
-console.log(date.toLocaleDateString("en-US", options)); // "Friday, November 8, 2024"
+
+formatDate(new Date(), "YYYY-MM-DD");          // "2025-07-04"
+formatDate(new Date(), "DD/MM/YYYY");          // "04/07/2025"
+formatDate(new Date(), "MM-DD-YY");            // "07-04-25"
+formatDate(new Date(), "DD MMM, YYYY");        // won't work — see named months below
+formatDate(new Date(), "HH:mm:ss");            // "14:30:05"
+formatDate(new Date(), "YYYY-MM-DD HH:mm:ss"); // "2025-07-04 14:30:05"
 ```
 
 ---
 
-### Summary of Common Date Formats
+### Named months and weekdays
 
-| Format Type                            | Example                         | Code Example                                      |
-| -------------------------------------- | ------------------------------- | ------------------------------------------------- |
-| ISO 8601                               | `2024-11-08T08:00:00.000Z`      | `date.toISOString()`                              |
-| US Locale (MM/DD/YYYY)                 | `11/08/2024`                    | `date.toLocaleDateString('en-US')`                |
-| UK Locale (DD/MM/YYYY)                 | `08/11/2024`                    | `date.toLocaleDateString('en-GB')`                |
-| Custom (MM/DD/YYYY)                    | `11/08/2024`                    | `const format = '${month}/${day}/${year}'`        |
-| Unix Timestamp (milliseconds)          | `1636774747418`                 | `Date.now()`                                      |
-| UTC Format                             | `Fri, 08 Nov 2024 08:00:00 GMT` | `date.toUTCString()`                              |
-| Time Format (HH:mm:ss)                 | `08:00:00`                      | `const format = '${hours}:${minutes}:${seconds}'` |
-| Full Date Format (weekday, month, day) | `Friday, November 8, 2024`      | `date.toLocaleDateString('en-US', options)`       |
+Extend the formatter to support full and abbreviated month/day names.
 
-These formats can be adapted further depending on your requirements.
+```javascript
+const MONTHS_FULL  = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS_FULL    = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const DAYS_SHORT   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+const formatDateFull = (date, pattern) => {
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, "0");
+
+  const tokens = {
+    YYYY:  d.getFullYear(),
+    MM:    pad(d.getMonth() + 1),
+    DD:    pad(d.getDate()),
+    HH:    pad(d.getHours()),
+    mm:    pad(d.getMinutes()),
+    ss:    pad(d.getSeconds()),
+    MMMM:  MONTHS_FULL[d.getMonth()],
+    MMM:   MONTHS_SHORT[d.getMonth()],
+    DDDD:  DAYS_FULL[d.getDay()],
+    DDD:   DAYS_SHORT[d.getDay()],
+  };
+
+  return pattern.replace(/YYYY|MMMM|MMM|DDDD|DDD|MM|DD|HH|mm|ss/g, (t) => tokens[t]);
+};
+
+formatDateFull(new Date(), "DDDD, MMMM DD, YYYY");  // "Friday, July 04, 2025"
+formatDateFull(new Date(), "DDD, DD MMM YYYY");      // "Fri, 04 Jul 2025"
+formatDateFull(new Date(), "MMMM D, YYYY");          // uses MM token — adjust as needed
+```
+
+---
+
+### Common display formats — copy-paste ready
+
+```javascript
+const date = new Date("2025-07-04T14:30:05");
+
+// ISO 8601 (storage / APIs)
+date.toISOString();
+// "2025-07-04T14:30:05.000Z"
+
+// US format
+date.toLocaleDateString("en-US");
+// "7/4/2025"
+
+// UK / European format
+date.toLocaleDateString("en-GB");
+// "04/07/2025"
+
+// Long form
+date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+// "July 4, 2025"
+
+// With weekday
+date.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+// "Friday, July 4, 2025"
+
+// Short weekday + date
+date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+// "Fri, Jul 4"
+
+// Time only (12-hour)
+date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+// "02:30 PM"
+
+// Time only (24-hour)
+date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+// "14:30"
+
+// Date + time together
+date.toLocaleString("en-US", {
+  year: "numeric", month: "short", day: "numeric",
+  hour: "2-digit", minute: "2-digit",
+});
+// "Jul 4, 2025, 02:30 PM"
+```
+
+---
+
+### Formatting for different regions
+
+```javascript
+const date = new Date("2025-07-04");
+
+const locales = [
+  ["en-US", "US"],
+  ["en-GB", "UK"],
+  ["fr-FR", "France"],
+  ["de-DE", "Germany"],
+  ["ja-JP", "Japan"],
+  ["ar-SA", "Arabic"],
+  ["zh-CN", "China"],
+  ["hi-IN", "India"],
+];
+
+const opts = { year: "numeric", month: "long", day: "numeric" };
+locales.forEach(([locale, label]) => {
+  console.log(`${label}: ${date.toLocaleDateString(locale, opts)}`);
+});
+
+// US:      July 4, 2025
+// UK:      4 July 2025
+// France:  4 juillet 2025
+// Germany: 4. Juli 2025
+// Japan:   2025年7月4日
+// Arabic:  ٤ يوليو ٢٠٢٥
+// China:   2025年7月4日
+// India:   4 जुलाई 2025
+```
+
+---
+
+### Parse non-standard date strings
+
+When `new Date("string")` doesn't work (e.g. `"04-07-2025"` in DD-MM-YYYY).
+
+```javascript
+// Parse DD-MM-YYYY → Date
+const parseDMY = (str) => {
+  const [day, month, year] = str.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+parseDMY("04-07-2025"); // Fri Jul 04 2025
+
+// Parse MM/DD/YYYY → Date
+const parseMDY = (str) => {
+  const [month, day, year] = str.split("/").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+parseMDY("07/04/2025"); // Fri Jul 04 2025
+```
+
+---
+
+### Add / subtract from a date
+
+```javascript
+const addDays    = (date, n) => new Date(new Date(date).setDate(new Date(date).getDate() + n));
+const addMonths  = (date, n) => new Date(new Date(date).setMonth(new Date(date).getMonth() + n));
+const addYears   = (date, n) => new Date(new Date(date).setFullYear(new Date(date).getFullYear() + n));
+const addHours   = (date, n) => new Date(new Date(date).getTime() + n * 3600000);
+const addMinutes = (date, n) => new Date(new Date(date).getTime() + n * 60000);
+
+const today = new Date("2025-07-04");
+
+addDays(today, 7).toDateString();     // "Fri Jul 11 2025"
+addDays(today, -7).toDateString();    // "Fri Jun 27 2025"
+addMonths(today, 3).toDateString();   // "Fri Oct 03 2025" (approx)
+addYears(today, 1).toDateString();    // "Sat Jul 04 2026"
+```
+
+---
+
+### Start and end of a time period
+
+```javascript
+const startOfDay   = (date) => new Date(new Date(date).setHours(0, 0, 0, 0));
+const endOfDay     = (date) => new Date(new Date(date).setHours(23, 59, 59, 999));
+
+const startOfMonth = (date) => {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+};
+const endOfMonth = (date) => {
+  const d = new Date(date);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+};
+
+const startOfYear = (date) => new Date(new Date(date).getFullYear(), 0, 1);
+const endOfYear   = (date) => new Date(new Date(date).getFullYear(), 11, 31, 23, 59, 59, 999);
+
+const d = new Date("2025-07-04");
+startOfMonth(d).toDateString(); // "Tue Jul 01 2025"
+endOfMonth(d).toDateString();   // "Thu Jul 31 2025"
+```
+
+---
+
+### Summary of custom patterns
+
+| Pattern | Example output |
+|---|---|
+| `YYYY-MM-DD` | `2025-07-04` |
+| `DD/MM/YYYY` | `04/07/2025` |
+| `MM-DD-YY` | `07-04-25` |
+| `HH:mm:ss` | `14:30:05` |
+| `DDDD, MMMM DD, YYYY` | `Friday, July 04, 2025` |
+| `DDD, DD MMM YYYY` | `Fri, 04 Jul 2025` |
+| `YYYY-MM-DDTHH:mm:ss` | `2025-07-04T14:30:05` |

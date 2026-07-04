@@ -1,0 +1,219 @@
+---
+title: URL Utilities
+description: Parse URLs, extract query parameters, build query strings, and other URL helpers that developers constantly Google.
+---
+
+### parseURL
+
+Parse a URL string into its component parts.
+
+```javascript
+const parseURL = (url) => {
+  try {
+    const u = new URL(url);
+    return {
+      protocol: u.protocol,
+      host: u.host,
+      hostname: u.hostname,
+      port: u.port,
+      pathname: u.pathname,
+      search: u.search,
+      hash: u.hash,
+      origin: u.origin,
+    };
+  } catch {
+    return null;
+  }
+};
+
+parseURL("https://example.com:8080/path/to/page?q=hello&page=2#section");
+// {
+//   protocol: "https:",
+//   host: "example.com:8080",
+//   hostname: "example.com",
+//   port: "8080",
+//   pathname: "/path/to/page",
+//   search: "?q=hello&page=2",
+//   hash: "#section",
+//   origin: "https://example.com:8080"
+// }
+```
+
+---
+
+### getQueryParams
+
+Parse all query string parameters from a URL into a plain object.
+
+```javascript
+const getQueryParams = (url = window.location.href) => {
+  const params = new URL(url).searchParams;
+  return Object.fromEntries(params.entries());
+};
+
+getQueryParams("https://example.com/search?q=hello&page=2&sort=asc");
+// { q: "hello", page: "2", sort: "asc" }
+```
+
+#### Get a single query param
+
+```javascript
+const getQueryParam = (name, url = window.location.href) =>
+  new URL(url).searchParams.get(name);
+
+getQueryParam("page", "https://example.com?page=3"); // "3"
+getQueryParam("missing", "https://example.com?q=hi"); // null
+```
+
+---
+
+### buildQueryString
+
+Build a query string from an object.
+
+```javascript
+const buildQueryString = (params) =>
+  "?" + new URLSearchParams(params).toString();
+
+buildQueryString({ q: "hello world", page: 2, sort: "asc" });
+// "?q=hello+world&page=2&sort=asc"
+```
+
+#### Append to existing URL
+
+```javascript
+const appendQueryParams = (url, params) => {
+  const u = new URL(url);
+  Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+  return u.toString();
+};
+
+appendQueryParams("https://example.com/search?q=hi", { page: 2, sort: "asc" });
+// "https://example.com/search?q=hi&page=2&sort=asc"
+```
+
+---
+
+### removeQueryParam
+
+Remove a specific query parameter from a URL.
+
+```javascript
+const removeQueryParam = (url, key) => {
+  const u = new URL(url);
+  u.searchParams.delete(key);
+  return u.toString();
+};
+
+removeQueryParam("https://example.com?q=hi&page=2", "page");
+// "https://example.com/?q=hi"
+```
+
+---
+
+### isValidUrl
+
+Check if a string is a valid URL.
+
+```javascript
+const isValidUrl = (url) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+isValidUrl("https://example.com");    // true
+isValidUrl("http://localhost:3000");  // true
+isValidUrl("not a url");             // false
+isValidUrl("ftp://files.example.com"); // true
+```
+
+---
+
+### getDomain
+
+Extract the base domain from a URL.
+
+```javascript
+const getDomain = (url) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+};
+
+getDomain("https://www.example.com/path?q=1"); // "www.example.com"
+getDomain("https://api.github.com/users");      // "api.github.com"
+```
+
+---
+
+### getBasePath
+
+Get the path without query string or hash.
+
+```javascript
+const getBasePath = (url) => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return null;
+  }
+};
+
+getBasePath("https://example.com/docs/intro?tab=1#section"); // "/docs/intro"
+```
+
+---
+
+### joinUrl
+
+Safely join URL parts (handles trailing/leading slashes).
+
+```javascript
+const joinUrl = (...parts) =>
+  parts
+    .map((p, i) => (i === 0 ? p.replace(/\/$/, "") : p.replace(/^\/+/, "")))
+    .join("/");
+
+joinUrl("https://example.com/", "/api/", "/users");
+// "https://example.com/api/users"
+
+joinUrl("https://example.com", "docs", "intro");
+// "https://example.com/docs/intro"
+```
+
+---
+
+### isRelativeUrl
+
+Check if a URL is relative (no protocol or host).
+
+```javascript
+const isRelativeUrl = (url) => !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+
+isRelativeUrl("/about");                  // true
+isRelativeUrl("../images/photo.png");     // true
+isRelativeUrl("https://example.com");    // false
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `parseURL(url)` | Break a URL into all its parts |
+| `getQueryParams(url)` | All query params as an object |
+| `getQueryParam(name, url)` | Get a single query param |
+| `buildQueryString(params)` | Object → `?key=value&...` |
+| `appendQueryParams(url, params)` | Add/update params on a URL |
+| `removeQueryParam(url, key)` | Strip one query param |
+| `isValidUrl(url)` | Boolean validity check |
+| `getDomain(url)` | Extract hostname |
+| `joinUrl(...parts)` | Safe URL joining |
+| `isRelativeUrl(url)` | Detect relative vs absolute |

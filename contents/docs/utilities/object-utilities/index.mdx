@@ -1,0 +1,240 @@
+---
+title: Object Utilities
+description: Handy object manipulation helpers for deep cloning, merging, picking keys, checking equality, and more. No lodash needed.
+---
+
+### deepClone
+
+Create a true deep copy of an object (no shared references).
+
+```javascript
+// Modern approach — works for most data types
+const deepClone = (obj) => structuredClone(obj);
+
+// Fallback for older environments
+const deepCloneJSON = (obj) => JSON.parse(JSON.stringify(obj));
+
+const original = { a: 1, b: { c: 2 } };
+const clone = deepClone(original);
+
+clone.b.c = 99;
+console.log(original.b.c); // 2 — original is untouched
+```
+
+> **Note:** `structuredClone` is available in Node 17+ and all modern browsers. It handles `Date`, `Map`, `Set`, `ArrayBuffer`, and circular references. `JSON.parse(JSON.stringify())` does not handle `Date`, `undefined`, or functions.
+
+---
+
+### deepMerge
+
+Recursively merge two objects (nested properties are merged, not overwritten).
+
+```javascript
+const deepMerge = (target, source) => {
+  const result = { ...target };
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] &&
+      typeof source[key] === "object" &&
+      !Array.isArray(source[key])
+    ) {
+      result[key] = deepMerge(target[key] ?? {}, source[key]);
+    } else {
+      result[key] = source[key];
+    }
+  }
+  return result;
+};
+
+const defaults = { theme: "light", font: { size: 14, family: "sans" } };
+const overrides = { font: { size: 18 } };
+
+deepMerge(defaults, overrides);
+// { theme: "light", font: { size: 18, family: "sans" } }
+```
+
+---
+
+### pick
+
+Create a new object with only the specified keys.
+
+```javascript
+const pick = (obj, keys) =>
+  Object.fromEntries(keys.filter((k) => k in obj).map((k) => [k, obj[k]]));
+
+const user = { id: 1, name: "Alice", email: "alice@example.com", password: "secret" };
+
+pick(user, ["id", "name"]);
+// { id: 1, name: "Alice" }
+```
+
+---
+
+### omit
+
+Create a new object without the specified keys.
+
+```javascript
+const omit = (obj, keys) =>
+  Object.fromEntries(Object.entries(obj).filter(([k]) => !keys.includes(k)));
+
+const user = { id: 1, name: "Alice", email: "alice@example.com", password: "secret" };
+
+omit(user, ["password", "email"]);
+// { id: 1, name: "Alice" }
+```
+
+---
+
+### deepEqual
+
+Check if two values are deeply equal.
+
+```javascript
+const deepEqual = (a, b) => {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== "object" || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  return keysA.every((key) => deepEqual(a[key], b[key]));
+};
+
+deepEqual({ a: 1, b: { c: 2 } }, { a: 1, b: { c: 2 } }); // true
+deepEqual({ a: 1 }, { a: 2 });                             // false
+deepEqual([1, [2, 3]], [1, [2, 3]]);                       // true
+```
+
+---
+
+### isEmpty
+
+Check if an object (or array, string, Map, Set) is empty.
+
+```javascript
+const isEmpty = (val) => {
+  if (val == null) return true;
+  if (typeof val === "string" || Array.isArray(val)) return val.length === 0;
+  if (val instanceof Map || val instanceof Set) return val.size === 0;
+  if (typeof val === "object") return Object.keys(val).length === 0;
+  return false;
+};
+
+isEmpty({});          // true
+isEmpty([]);          // true
+isEmpty("");          // true
+isEmpty(new Map());   // true
+isEmpty({ a: 1 });   // false
+isEmpty([1, 2]);      // false
+```
+
+---
+
+### flattenObject
+
+Flatten a nested object into dot-notation keys.
+
+```javascript
+const flattenObject = (obj, prefix = "") =>
+  Object.entries(obj).reduce((acc, [key, val]) => {
+    const newKey = prefix ? `${prefix}.${key}` : key;
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      Object.assign(acc, flattenObject(val, newKey));
+    } else {
+      acc[newKey] = val;
+    }
+    return acc;
+  }, {});
+
+flattenObject({ a: 1, b: { c: 2, d: { e: 3 } } });
+// { "a": 1, "b.c": 2, "b.d.e": 3 }
+```
+
+---
+
+### unflattenObject
+
+Reverse a flattened dot-notation object back to nested.
+
+```javascript
+const unflattenObject = (obj) =>
+  Object.entries(obj).reduce((acc, [key, val]) => {
+    key.split(".").reduce((cur, part, i, arr) => {
+      if (i === arr.length - 1) cur[part] = val;
+      else cur[part] = cur[part] ?? {};
+      return cur[part];
+    }, acc);
+    return acc;
+  }, {});
+
+unflattenObject({ "a": 1, "b.c": 2, "b.d.e": 3 });
+// { a: 1, b: { c: 2, d: { e: 3 } } }
+```
+
+---
+
+### invertObject
+
+Swap keys and values of an object.
+
+```javascript
+const invertObject = (obj) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]));
+
+invertObject({ a: 1, b: 2, c: 3 }); // { "1": "a", "2": "b", "3": "c" }
+invertObject({ sun: "day", moon: "night" }); // { day: "sun", night: "moon" }
+```
+
+---
+
+### mapValues
+
+Apply a transform to every value in an object.
+
+```javascript
+const mapValues = (obj, fn) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(v)]));
+
+mapValues({ a: 1, b: 2, c: 3 }, (n) => n * 2);
+// { a: 2, b: 4, c: 6 }
+
+mapValues({ name: "alice", city: "paris" }, (s) => s.toUpperCase());
+// { name: "ALICE", city: "PARIS" }
+```
+
+---
+
+### filterObject
+
+Filter an object's entries by a predicate.
+
+```javascript
+const filterObject = (obj, fn) =>
+  Object.fromEntries(Object.entries(obj).filter(([k, v]) => fn(v, k)));
+
+const scores = { alice: 90, bob: 45, carol: 78, dave: 30 };
+
+filterObject(scores, (score) => score >= 60);
+// { alice: 90, carol: 78 }
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `deepClone` | True deep copy with no shared references |
+| `deepMerge(target, source)` | Recursively merge nested objects |
+| `pick(obj, keys)` | Keep only specified keys |
+| `omit(obj, keys)` | Remove specified keys |
+| `deepEqual(a, b)` | Structural equality check |
+| `isEmpty` | Works on objects, arrays, strings, Map, Set |
+| `flattenObject` | `{ a: { b: 1 } }` → `{ "a.b": 1 }` |
+| `unflattenObject` | Reverse of flattenObject |
+| `invertObject` | Swap keys and values |
+| `mapValues(obj, fn)` | Transform every value |
+| `filterObject(obj, fn)` | Keep only matching entries |

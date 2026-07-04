@@ -1,0 +1,235 @@
+---
+title: Color Utilities
+description: Convert between hex, RGB, and HSL. Lighten, darken, and manipulate colors in pure JavaScript — no library needed.
+---
+
+### hexToRgb
+
+Convert a hex color string to an RGB object.
+
+```javascript
+const hexToRgb = (hex) => {
+  const clean = hex.replace("#", "");
+  const expanded = clean.length === 3
+    ? clean.split("").map((c) => c + c).join("")
+    : clean;
+  const num = parseInt(expanded, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+};
+
+hexToRgb("#ff5733"); // { r: 255, g: 87, b: 51 }
+hexToRgb("#fff");    // { r: 255, g: 255, b: 255 }
+hexToRgb("#000000"); // { r: 0, g: 0, b: 0 }
+```
+
+---
+
+### rgbToHex
+
+Convert RGB values to a hex color string.
+
+```javascript
+const rgbToHex = (r, g, b) =>
+  "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+
+rgbToHex(255, 87, 51);   // "#ff5733"
+rgbToHex(0, 0, 0);       // "#000000"
+rgbToHex(255, 255, 255); // "#ffffff"
+```
+
+---
+
+### hexToHsl
+
+Convert a hex color to HSL values.
+
+```javascript
+const hexToHsl = (hex) => {
+  const { r, g, b } = hexToRgb(hex);
+  const rr = r / 255, gg = g / 255, bb = b / 255;
+  const max = Math.max(rr, gg, bb), min = Math.min(rr, gg, bb);
+  let h, s;
+  const l = (max + min) / 2;
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case rr: h = ((gg - bb) / d + (gg < bb ? 6 : 0)) / 6; break;
+      case gg: h = ((bb - rr) / d + 2) / 6; break;
+      case bb: h = ((rr - gg) / d + 4) / 6; break;
+    }
+  }
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
+};
+
+hexToHsl("#ff5733"); // { h: 11, s: 100, l: 60 }
+hexToHsl("#3498db"); // { h: 204, s: 70, l: 53 }
+```
+
+---
+
+### hslToHex
+
+Convert HSL values back to a hex string.
+
+```javascript
+const hslToHex = (h, s, l) => {
+  s /= 100;
+  l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+};
+
+hslToHex(11, 100, 60);  // "#ff5733"
+hslToHex(0, 0, 100);    // "#ffffff"
+hslToHex(0, 0, 0);      // "#000000"
+```
+
+---
+
+### lighten
+
+Lighten a hex color by a percentage.
+
+```javascript
+const lighten = (hex, amount) => {
+  const { h, s, l } = hexToHsl(hex);
+  return hslToHex(h, s, Math.min(100, l + amount));
+};
+
+lighten("#3498db", 20); // lighter blue
+lighten("#ff5733", 15); // lighter red-orange
+```
+
+---
+
+### darken
+
+Darken a hex color by a percentage.
+
+```javascript
+const darken = (hex, amount) => {
+  const { h, s, l } = hexToHsl(hex);
+  return hslToHex(h, s, Math.max(0, l - amount));
+};
+
+darken("#3498db", 20); // darker blue
+darken("#ffffff", 10); // light grey
+```
+
+---
+
+### adjustOpacity
+
+Convert a hex color to `rgba()` with a custom opacity.
+
+```javascript
+const adjustOpacity = (hex, opacity) => {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
+adjustOpacity("#ff5733", 0.5);  // "rgba(255, 87, 51, 0.5)"
+adjustOpacity("#3498db", 0.8);  // "rgba(52, 152, 219, 0.8)"
+```
+
+---
+
+### generateRandomColor
+
+Generate a random hex color.
+
+```javascript
+const randomColor = () =>
+  "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
+
+randomColor(); // "#a3f2c1" (random)
+randomColor(); // "#3e7bff" (random)
+```
+
+---
+
+### getContrastColor
+
+Return black or white depending on which has better contrast against a background color.
+
+```javascript
+const getContrastColor = (hex) => {
+  const { r, g, b } = hexToRgb(hex);
+  // Perceived luminance formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? "#000000" : "#ffffff";
+};
+
+getContrastColor("#ffffff"); // "#000000" (use black text on white)
+getContrastColor("#000000"); // "#ffffff" (use white text on black)
+getContrastColor("#3498db"); // "#ffffff" (white text on blue)
+getContrastColor("#f0e68c"); // "#000000" (black text on khaki)
+```
+
+---
+
+### isValidHex
+
+Check if a string is a valid hex color.
+
+```javascript
+const isValidHex = (color) =>
+  /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(color);
+
+isValidHex("#fff");     // true
+isValidHex("#1a2b3c"); // true
+isValidHex("ff5733");  // false (missing #)
+isValidHex("#12345");  // false (wrong length)
+```
+
+---
+
+### blendColors
+
+Mix two hex colors together at a given ratio.
+
+```javascript
+const blendColors = (hex1, hex2, ratio = 0.5) => {
+  const c1 = hexToRgb(hex1);
+  const c2 = hexToRgb(hex2);
+  const blend = (a, b) => Math.round(a + (b - a) * ratio);
+  return rgbToHex(blend(c1.r, c2.r), blend(c1.g, c2.g), blend(c1.b, c2.b));
+};
+
+blendColors("#ff0000", "#0000ff");       // "#800080" (purple)
+blendColors("#ff0000", "#0000ff", 0.25); // "#bf0040" (more red)
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `hexToRgb(hex)` | `"#ff5733"` → `{ r, g, b }` |
+| `rgbToHex(r, g, b)` | `255, 87, 51` → `"#ff5733"` |
+| `hexToHsl(hex)` | `"#3498db"` → `{ h, s, l }` |
+| `hslToHex(h, s, l)` | `204, 70, 53` → `"#3498db"` |
+| `lighten(hex, %)` | Make a color lighter |
+| `darken(hex, %)` | Make a color darker |
+| `adjustOpacity(hex, n)` | Hex → `rgba(...)` |
+| `randomColor()` | Random hex color |
+| `getContrastColor(hex)` | `"#000"` or `"#fff"` for readable text |
+| `isValidHex(color)` | Validate hex color string |
+| `blendColors(a, b, ratio)` | Mix two colors |

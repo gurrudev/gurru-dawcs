@@ -1,0 +1,284 @@
+---
+title: Keyboard & Events
+description: Key detection, keyboard shortcut listeners, event delegation, and event utility helpers that save time on every interactive UI project.
+---
+
+### isKey
+
+Check if a keyboard event matches a specific key.
+
+```javascript
+const isKey = (event, key) =>
+  event.key === key || event.code === key;
+
+document.addEventListener("keydown", (e) => {
+  if (isKey(e, "Escape")) closeModal();
+  if (isKey(e, "Enter"))  submitForm();
+});
+```
+
+---
+
+### Key Codes Reference
+
+Keys that developers always Google.
+
+```javascript
+// Navigation
+"ArrowUp"   "ArrowDown"  "ArrowLeft"  "ArrowRight"
+"Home"      "End"        "PageUp"     "PageDown"
+
+// Editing
+"Enter"     "Backspace"  "Delete"     "Tab"
+"Escape"    "Space"      "Insert"
+
+// Modifier keys (check via event properties, not event.key)
+event.ctrlKey   // Ctrl
+event.shiftKey  // Shift
+event.altKey    // Alt / Option
+event.metaKey   // Cmd (Mac) / Win key
+
+// Function keys
+"F1" through "F12"
+```
+
+---
+
+### onShortcut
+
+Register a keyboard shortcut with modifier key support.
+
+```javascript
+const onShortcut = (combo, handler) => {
+  const keys = combo.toLowerCase().split("+");
+  const key = keys[keys.length - 1];
+  const ctrl  = keys.includes("ctrl");
+  const shift = keys.includes("shift");
+  const alt   = keys.includes("alt");
+  const meta  = keys.includes("meta") || keys.includes("cmd");
+
+  const listener = (e) => {
+    if (
+      e.key.toLowerCase() === key &&
+      e.ctrlKey  === ctrl  &&
+      e.shiftKey === shift &&
+      e.altKey   === alt   &&
+      e.metaKey  === meta
+    ) {
+      e.preventDefault();
+      handler(e);
+    }
+  };
+
+  document.addEventListener("keydown", listener);
+  return () => document.removeEventListener("keydown", listener); // cleanup
+};
+
+// Usage
+const off = onShortcut("ctrl+k", () => openSearch());
+const off2 = onShortcut("ctrl+shift+p", () => openCommandPalette());
+const off3 = onShortcut("escape", () => closeModal());
+
+// Later, remove listener
+off();
+```
+
+---
+
+### onClickOutside
+
+Call a handler when the user clicks outside a given element.
+
+```javascript
+const onClickOutside = (element, handler) => {
+  const listener = (e) => {
+    if (!element.contains(e.target)) handler(e);
+  };
+  document.addEventListener("mousedown", listener);
+  return () => document.removeEventListener("mousedown", listener);
+};
+
+// Usage
+const modal = document.querySelector("#modal");
+const off = onClickOutside(modal, () => closeModal());
+
+// When modal closes
+off();
+```
+
+---
+
+### delegate
+
+Attach a single event listener to a parent and match events from specific child selectors (event delegation).
+
+```javascript
+const delegate = (parent, selector, event, handler) => {
+  const listener = (e) => {
+    const target = e.target.closest(selector);
+    if (target && parent.contains(target)) handler(e, target);
+  };
+  parent.addEventListener(event, listener);
+  return () => parent.removeEventListener(event, listener);
+};
+
+// Usage: one listener handles all button clicks in a list
+const list = document.querySelector("#item-list");
+delegate(list, "[data-id]", "click", (e, el) => {
+  console.log("Clicked item:", el.dataset.id);
+});
+```
+
+---
+
+### on / off — typed addEventListener wrapper
+
+```javascript
+const on = (target, event, handler, options) => {
+  target.addEventListener(event, handler, options);
+  return () => target.removeEventListener(event, handler, options);
+};
+
+// Usage
+const off = on(window, "resize", handleResize);
+
+// One-time listener
+const offOnce = on(button, "click", handler, { once: true });
+```
+
+---
+
+### emitter — simple event bus
+
+Lightweight pub/sub system without a library.
+
+```javascript
+const createEmitter = () => {
+  const listeners = {};
+  return {
+    on(event, fn) {
+      (listeners[event] ??= []).push(fn);
+      return () => this.off(event, fn);
+    },
+    off(event, fn) {
+      listeners[event] = (listeners[event] ?? []).filter((f) => f !== fn);
+    },
+    emit(event, ...args) {
+      (listeners[event] ?? []).forEach((fn) => fn(...args));
+    },
+    once(event, fn) {
+      const wrapper = (...args) => { fn(...args); this.off(event, wrapper); };
+      return this.on(event, wrapper);
+    },
+  };
+};
+
+// Usage
+const bus = createEmitter();
+
+bus.on("login", (user) => console.log("User logged in:", user.name));
+bus.emit("login", { name: "Alice" }); // "User logged in: Alice"
+```
+
+---
+
+### isModifierPressed
+
+Check which modifier keys are currently held down.
+
+```javascript
+const isModifierPressed = (e) => ({
+  ctrl:  e.ctrlKey,
+  shift: e.shiftKey,
+  alt:   e.altKey,
+  meta:  e.metaKey,
+  any:   e.ctrlKey || e.shiftKey || e.altKey || e.metaKey,
+});
+
+document.addEventListener("keydown", (e) => {
+  const mod = isModifierPressed(e);
+  if (mod.ctrl && e.key === "s") saveDocument();
+  if (mod.meta && e.key === "s") saveDocument(); // Cmd+S on Mac
+});
+```
+
+---
+
+### disableScroll / enableScroll
+
+Prevent the page from scrolling (e.g. when a modal is open).
+
+```javascript
+const disableScroll = () => {
+  const scrollY = window.scrollY;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = "100%";
+};
+
+const enableScroll = () => {
+  const scrollY = document.body.style.top;
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.width = "";
+  window.scrollTo(0, parseInt(scrollY || "0") * -1);
+};
+
+// Open modal
+disableScroll();
+
+// Close modal
+enableScroll();
+```
+
+---
+
+### trapFocus
+
+Keep keyboard focus inside a modal or dialog (accessibility requirement).
+
+```javascript
+const trapFocus = (container) => {
+  const focusable = container.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const first = focusable[0];
+  const last  = focusable[focusable.length - 1];
+
+  const listener = (e) => {
+    if (e.key !== "Tab") return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) { last.focus(); e.preventDefault(); }
+    } else {
+      if (document.activeElement === last) { first.focus(); e.preventDefault(); }
+    }
+  };
+
+  container.addEventListener("keydown", listener);
+  first?.focus();
+  return () => container.removeEventListener("keydown", listener);
+};
+
+// Usage
+const modal = document.querySelector("#modal");
+const off = trapFocus(modal);
+
+// When modal closes
+off();
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `isKey(event, key)` | Check key name/code |
+| `onShortcut(combo, fn)` | Register `ctrl+k` style shortcuts |
+| `onClickOutside(el, fn)` | Detect clicks outside an element |
+| `delegate(parent, selector, event, fn)` | Event delegation |
+| `on(target, event, fn)` | Typed addEventListener + cleanup |
+| `createEmitter()` | Lightweight pub/sub event bus |
+| `isModifierPressed(e)` | Ctrl/Shift/Alt/Meta state |
+| `disableScroll / enableScroll` | Lock page scroll (for modals) |
+| `trapFocus(container)` | Keyboard accessibility for modals |

@@ -1,0 +1,245 @@
+---
+title: Relative Time
+description: Human-readable time differences — "2 minutes ago", "in 3 days", "just now". Countdown timers and duration formatting without any libraries.
+---
+
+### timeAgo
+
+Convert a past date into a human-readable relative string.
+
+```javascript
+const timeAgo = (date) => {
+  const seconds = Math.floor((Date.now() - new Date(date)) / 1000);
+  const intervals = [
+    { label: "year",   seconds: 31536000 },
+    { label: "month",  seconds: 2592000  },
+    { label: "week",   seconds: 604800   },
+    { label: "day",    seconds: 86400    },
+    { label: "hour",   seconds: 3600     },
+    { label: "minute", seconds: 60       },
+    { label: "second", seconds: 1        },
+  ];
+  for (const { label, seconds: s } of intervals) {
+    const count = Math.floor(seconds / s);
+    if (count >= 1) return `${count} ${label}${count > 1 ? "s" : ""} ago`;
+  }
+  return "just now";
+};
+
+timeAgo(new Date(Date.now() - 30000));           // "30 seconds ago"
+timeAgo(new Date(Date.now() - 90000));           // "1 minute ago"
+timeAgo(new Date(Date.now() - 7200000));         // "2 hours ago"
+timeAgo(new Date(Date.now() - 86400000 * 3));   // "3 days ago"
+timeAgo(new Date(Date.now() - 86400000 * 400)); // "1 year ago"
+```
+
+---
+
+### timeFrom
+
+Convert a future date into a "time from now" string.
+
+```javascript
+const timeFrom = (date) => {
+  const seconds = Math.floor((new Date(date) - Date.now()) / 1000);
+  if (seconds < 0) return timeAgo(date); // already passed
+  const intervals = [
+    { label: "year",   seconds: 31536000 },
+    { label: "month",  seconds: 2592000  },
+    { label: "week",   seconds: 604800   },
+    { label: "day",    seconds: 86400    },
+    { label: "hour",   seconds: 3600     },
+    { label: "minute", seconds: 60       },
+    { label: "second", seconds: 1        },
+  ];
+  for (const { label, seconds: s } of intervals) {
+    const count = Math.floor(seconds / s);
+    if (count >= 1) return `in ${count} ${label}${count > 1 ? "s" : ""}`;
+  }
+  return "just now";
+};
+
+timeFrom(new Date(Date.now() + 3600000));      // "in 1 hour"
+timeFrom(new Date(Date.now() + 86400000 * 5)); // "in 5 days"
+timeFrom(new Date(Date.now() + 60000));        // "in 1 minute"
+```
+
+---
+
+### Using the native Intl.RelativeTimeFormat
+
+The built-in API — no custom logic needed for modern apps.
+
+```javascript
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+rtf.format(-1, "day");    // "yesterday"
+rtf.format(1, "day");     // "tomorrow"
+rtf.format(-3, "hour");   // "3 hours ago"
+rtf.format(2, "week");    // "in 2 weeks"
+rtf.format(-1, "month");  // "last month"
+rtf.format(1, "year");    // "next year"
+
+// Helper that picks the right unit automatically
+const relativeTime = (date) => {
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const diff = (new Date(date) - Date.now()) / 1000;
+  const units = [
+    { unit: "year",   threshold: 31536000 },
+    { unit: "month",  threshold: 2592000  },
+    { unit: "week",   threshold: 604800   },
+    { unit: "day",    threshold: 86400    },
+    { unit: "hour",   threshold: 3600     },
+    { unit: "minute", threshold: 60       },
+    { unit: "second", threshold: 1        },
+  ];
+  for (const { unit, threshold } of units) {
+    if (Math.abs(diff) >= threshold) {
+      return rtf.format(Math.round(diff / threshold), unit);
+    }
+  }
+  return "just now";
+};
+
+relativeTime(new Date(Date.now() - 90000));          // "2 minutes ago"
+relativeTime(new Date(Date.now() + 86400000));       // "tomorrow"
+relativeTime(new Date(Date.now() - 86400000 * 2));  // "2 days ago"
+```
+
+---
+
+### formatDuration
+
+Format a number of seconds into a readable duration string.
+
+```javascript
+const formatDuration = (totalSeconds) => {
+  const days    = Math.floor(totalSeconds / 86400);
+  const hours   = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts = [];
+  if (days)    parts.push(`${days}d`);
+  if (hours)   parts.push(`${hours}h`);
+  if (minutes) parts.push(`${minutes}m`);
+  if (seconds || parts.length === 0) parts.push(`${seconds}s`);
+  return parts.join(" ");
+};
+
+formatDuration(45);      // "45s"
+formatDuration(90);      // "1m 30s"
+formatDuration(3661);    // "1h 1m 1s"
+formatDuration(90061);   // "1d 1h 1m 1s"
+```
+
+---
+
+### formatDurationHuman
+
+More natural language formatting.
+
+```javascript
+const formatDurationHuman = (ms) => {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours   = Math.floor(minutes / 60);
+  const days    = Math.floor(hours / 24);
+
+  if (days > 0)    return `${days} day${days > 1 ? "s" : ""}`;
+  if (hours > 0)   return `${hours} hour${hours > 1 ? "s" : ""}`;
+  if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+  return `${seconds} second${seconds !== 1 ? "s" : ""}`;
+};
+
+formatDurationHuman(1000);      // "1 second"
+formatDurationHuman(90000);     // "1 minute"
+formatDurationHuman(7200000);   // "2 hours"
+formatDurationHuman(172800000); // "2 days"
+```
+
+---
+
+### countdown
+
+Create a simple countdown that fires a callback every second.
+
+```javascript
+const countdown = (targetDate, onTick, onDone) => {
+  const tick = () => {
+    const remaining = Math.max(0, Math.floor((new Date(targetDate) - Date.now()) / 1000));
+    const days    = Math.floor(remaining / 86400);
+    const hours   = Math.floor((remaining % 86400) / 3600);
+    const minutes = Math.floor((remaining % 3600) / 60);
+    const seconds = remaining % 60;
+
+    onTick({ days, hours, minutes, seconds, remaining });
+
+    if (remaining <= 0) {
+      onDone?.();
+    } else {
+      setTimeout(tick, 1000);
+    }
+  };
+  tick();
+};
+
+// Usage
+countdown(
+  "2025-12-31T23:59:59",
+  ({ days, hours, minutes, seconds }) => {
+    console.log(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+  },
+  () => console.log("Happy New Year!")
+);
+```
+
+---
+
+### isSameDay / isToday / isYesterday / isTomorrow
+
+```javascript
+const isSameDay = (a, b) => {
+  const da = new Date(a), db = new Date(b);
+  return da.getFullYear() === db.getFullYear() &&
+         da.getMonth()    === db.getMonth() &&
+         da.getDate()     === db.getDate();
+};
+
+const isToday     = (date) => isSameDay(date, new Date());
+const isYesterday = (date) => isSameDay(date, new Date(Date.now() - 86400000));
+const isTomorrow  = (date) => isSameDay(date, new Date(Date.now() + 86400000));
+
+isToday(new Date());                       // true
+isYesterday(new Date(Date.now() - 86400000)); // true
+isTomorrow(new Date(Date.now() + 86400000));  // true
+```
+
+---
+
+### getDaysBetween
+
+Calculate the number of full days between two dates.
+
+```javascript
+const getDaysBetween = (a, b) =>
+  Math.abs(Math.floor((new Date(b) - new Date(a)) / 86400000));
+
+getDaysBetween("2024-01-01", "2024-12-31"); // 365
+getDaysBetween(new Date(), "2025-01-01");   // days until new year
+```
+
+---
+
+### Summary
+
+| Function | Example output |
+|---|---|
+| `timeAgo(date)` | `"3 hours ago"` |
+| `timeFrom(date)` | `"in 5 days"` |
+| `relativeTime(date)` | Uses native `Intl.RelativeTimeFormat` |
+| `formatDuration(seconds)` | `"1h 30m 45s"` |
+| `formatDurationHuman(ms)` | `"2 hours"` |
+| `countdown(date, onTick)` | Live tick with `{ days, hours, minutes, seconds }` |
+| `isToday / isYesterday / isTomorrow` | Boolean date checks |
+| `getDaysBetween(a, b)` | Number of full days apart |

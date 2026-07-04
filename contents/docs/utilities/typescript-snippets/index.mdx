@@ -1,0 +1,313 @@
+---
+title: TypeScript Snippets
+description: Built-in TypeScript utility types and common type patterns that developers always have to look up. Keep this page open while writing TypeScript.
+---
+
+### Built-in Utility Types
+
+TypeScript ships with a set of utility types that transform existing types.
+
+---
+
+### Partial\<T\>
+
+Make all properties of a type optional.
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+type PartialUser = Partial<User>;
+// { id?: number; name?: string; email?: string }
+
+function updateUser(id: number, changes: Partial<User>) {
+  // Only pass the fields you want to change
+}
+
+updateUser(1, { name: "Alice" }); // valid — email not required
+```
+
+---
+
+### Required\<T\>
+
+Make all optional properties required.
+
+```typescript
+interface Config {
+  host?: string;
+  port?: number;
+  timeout?: number;
+}
+
+type StrictConfig = Required<Config>;
+// { host: string; port: number; timeout: number }
+```
+
+---
+
+### Readonly\<T\>
+
+Prevent modification of any property.
+
+```typescript
+const config: Readonly<{ host: string; port: number }> = {
+  host: "localhost",
+  port: 3000,
+};
+
+// config.port = 8080; // Error: cannot assign to 'port'
+```
+
+---
+
+### Pick\<T, K\>
+
+Create a type with only the selected keys from T.
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+}
+
+type PublicUser = Pick<User, "id" | "name" | "email">;
+// { id: number; name: string; email: string }
+
+// Great for API responses — strip sensitive fields at the type level
+```
+
+---
+
+### Omit\<T, K\>
+
+Create a type with all keys of T except the specified ones.
+
+```typescript
+type SafeUser = Omit<User, "password">;
+// { id: number; name: string; email: string }
+```
+
+---
+
+### Record\<K, V\>
+
+Create an object type with keys of type K and values of type V.
+
+```typescript
+type RolePermissions = Record<"admin" | "editor" | "viewer", string[]>;
+
+const permissions: RolePermissions = {
+  admin:  ["read", "write", "delete"],
+  editor: ["read", "write"],
+  viewer: ["read"],
+};
+
+// Also useful for dynamic key maps:
+const cache: Record<string, number> = {};
+cache["score"] = 100;
+```
+
+---
+
+### Exclude\<T, U\>
+
+Remove types from a union.
+
+```typescript
+type Status = "active" | "inactive" | "deleted";
+
+type ActiveStatus = Exclude<Status, "deleted">;
+// "active" | "inactive"
+
+type NonString = Exclude<string | number | boolean, string>;
+// number | boolean
+```
+
+---
+
+### Extract\<T, U\>
+
+Keep only the types that are assignable to U.
+
+```typescript
+type Status = "active" | "inactive" | "deleted";
+
+type OnlyActive = Extract<Status, "active" | "pending">;
+// "active"  (only "active" exists in Status)
+```
+
+---
+
+### NonNullable\<T\>
+
+Remove `null` and `undefined` from a type.
+
+```typescript
+type MaybeString = string | null | undefined;
+
+type DefiniteString = NonNullable<MaybeString>;
+// string
+```
+
+---
+
+### ReturnType\<T\>
+
+Infer the return type of a function.
+
+```typescript
+const getUser = () => ({ id: 1, name: "Alice" });
+
+type User = ReturnType<typeof getUser>;
+// { id: number; name: string }
+
+// Useful when you don't own the function signature
+async function fetchData() {
+  return { items: [], total: 0 };
+}
+type FetchResult = Awaited<ReturnType<typeof fetchData>>;
+// { items: never[]; total: number }
+```
+
+---
+
+### Parameters\<T\>
+
+Infer the parameter types of a function as a tuple.
+
+```typescript
+function createUser(name: string, age: number, admin: boolean) {}
+
+type CreateUserArgs = Parameters<typeof createUser>;
+// [name: string, age: number, admin: boolean]
+
+type FirstArg = Parameters<typeof createUser>[0];
+// string
+```
+
+---
+
+### Awaited\<T\>
+
+Unwrap a Promise type.
+
+```typescript
+type Result = Awaited<Promise<string>>;
+// string
+
+type DeepResult = Awaited<Promise<Promise<number>>>;
+// number
+```
+
+---
+
+### Common Custom Types
+
+#### DeepPartial
+
+Recursively make all nested properties optional.
+
+```typescript
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
+interface Config {
+  server: { host: string; port: number };
+  db: { url: string; name: string };
+}
+
+type PartialConfig = DeepPartial<Config>;
+// { server?: { host?: string; port?: number }; db?: { url?: string; name?: string } }
+```
+
+---
+
+#### Nullable\<T\>
+
+Shorthand for `T | null`.
+
+```typescript
+type Nullable<T> = T | null;
+
+type MaybeUser = Nullable<User>;
+// User | null
+```
+
+---
+
+#### ValueOf\<T\>
+
+Get the type of an object's values.
+
+```typescript
+type ValueOf<T> = T[keyof T];
+
+const COLORS = { red: "#ff0000", green: "#00ff00", blue: "#0000ff" } as const;
+type ColorValue = ValueOf<typeof COLORS>;
+// "#ff0000" | "#00ff00" | "#0000ff"
+```
+
+---
+
+#### Prettify\<T\>
+
+Flatten a complex intersection type into a readable shape (hover-friendly).
+
+```typescript
+type Prettify<T> = { [K in keyof T]: T[K] } & {};
+
+type A = { id: number } & { name: string } & { role: string };
+type B = Prettify<A>;
+// { id: number; name: string; role: string }
+```
+
+---
+
+#### StringKeys\<T\>
+
+Get only the string keys of a type.
+
+```typescript
+type StringKeys<T> = {
+  [K in keyof T]: T[K] extends string ? K : never;
+}[keyof T];
+
+interface Mixed {
+  id: number;
+  name: string;
+  email: string;
+  active: boolean;
+}
+
+type TextFields = StringKeys<Mixed>;
+// "name" | "email"
+```
+
+---
+
+### Summary
+
+| Type | Effect |
+|---|---|
+| `Partial<T>` | All properties optional |
+| `Required<T>` | All properties required |
+| `Readonly<T>` | No property mutation |
+| `Pick<T, K>` | Keep only listed keys |
+| `Omit<T, K>` | Remove listed keys |
+| `Record<K, V>` | Key-value map type |
+| `Exclude<T, U>` | Remove from union |
+| `Extract<T, U>` | Keep matching union members |
+| `NonNullable<T>` | Remove `null` and `undefined` |
+| `ReturnType<T>` | Infer function return type |
+| `Parameters<T>` | Infer function parameter types |
+| `Awaited<T>` | Unwrap Promise type |
+| `DeepPartial<T>` | Recursively optional |
+| `Nullable<T>` | `T \| null` shorthand |
+| `ValueOf<T>` | Union of object values |

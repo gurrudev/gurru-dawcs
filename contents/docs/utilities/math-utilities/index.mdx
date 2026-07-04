@@ -1,0 +1,247 @@
+---
+title: Math Utilities
+description: GCD, LCM, factorial, Fibonacci, statistics (median, mode, standard deviation), prime checking, and other math helpers that developers always have to look up.
+---
+
+### clamp
+
+Restrict a number to a range. (Also in Number Utilities — repeated here for discoverability.)
+
+```javascript
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+clamp(15, 0, 10);  // 10
+clamp(-5, 0, 10);  // 0
+clamp(5,  0, 10);  // 5
+```
+
+---
+
+### GCD (Greatest Common Divisor)
+
+```javascript
+const gcd = (a, b) => (b === 0 ? Math.abs(a) : gcd(b, a % b));
+
+gcd(12, 8);   // 4
+gcd(100, 75); // 25
+gcd(0, 5);    // 5
+```
+
+---
+
+### LCM (Least Common Multiple)
+
+```javascript
+const lcm = (a, b) => Math.abs(a * b) / gcd(a, b);
+
+// For multiple numbers
+const lcmMany = (...nums) => nums.reduce(lcm);
+
+lcm(4, 6);          // 12
+lcm(12, 18);        // 36
+lcmMany(4, 6, 8);   // 24
+```
+
+---
+
+### factorial
+
+```javascript
+const factorial = (n) => {
+  if (n < 0) throw new RangeError("Factorial of negative number");
+  if (n === 0 || n === 1) return 1;
+  return n * factorial(n - 1);
+};
+
+factorial(0);  // 1
+factorial(5);  // 120
+factorial(10); // 3628800
+```
+
+---
+
+### fibonacci
+
+```javascript
+// Iterative (efficient — no stack overflow)
+const fibonacci = (n) => {
+  if (n < 0) throw new RangeError("Input must be non-negative");
+  if (n <= 1) return n;
+  let [a, b] = [0, 1];
+  for (let i = 2; i <= n; i++) [a, b] = [b, a + b];
+  return b;
+};
+
+fibonacci(0);  // 0
+fibonacci(1);  // 1
+fibonacci(10); // 55
+fibonacci(50); // 12586269025
+
+// Generate the first N fibonacci numbers
+const fibSequence = (n) =>
+  Array.from({ length: n }, (_, i) => fibonacci(i));
+
+fibSequence(8); // [0, 1, 1, 2, 3, 5, 8, 13]
+```
+
+---
+
+### isPrime
+
+```javascript
+const isPrime = (n) => {
+  if (n < 2) return false;
+  if (n === 2) return true;
+  if (n % 2 === 0) return false;
+  for (let i = 3; i <= Math.sqrt(n); i += 2) {
+    if (n % i === 0) return false;
+  }
+  return true;
+};
+
+isPrime(2);   // true
+isPrime(17);  // true
+isPrime(18);  // false
+isPrime(97);  // true
+```
+
+---
+
+### getPrimes (Sieve of Eratosthenes)
+
+Get all prime numbers up to N.
+
+```javascript
+const getPrimes = (limit) => {
+  const sieve = new Array(limit + 1).fill(true);
+  sieve[0] = sieve[1] = false;
+  for (let i = 2; i * i <= limit; i++) {
+    if (sieve[i]) {
+      for (let j = i * i; j <= limit; j += i) sieve[j] = false;
+    }
+  }
+  return sieve.reduce((primes, isPrime, i) => (isPrime ? [...primes, i] : primes), []);
+};
+
+getPrimes(20); // [2, 3, 5, 7, 11, 13, 17, 19]
+getPrimes(50).length; // 15 primes below 50
+```
+
+---
+
+### median
+
+```javascript
+const median = (arr) => {
+  if (arr.length === 0) return undefined;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0
+    ? sorted[mid]
+    : (sorted[mid - 1] + sorted[mid]) / 2;
+};
+
+median([1, 3, 5]);        // 3
+median([1, 2, 3, 4]);     // 2.5
+median([7, 1, 5, 3, 9]); // 5
+```
+
+---
+
+### mode
+
+Return the most frequently occurring value(s).
+
+```javascript
+const mode = (arr) => {
+  const freq = arr.reduce((acc, v) => { acc[v] = (acc[v] ?? 0) + 1; return acc; }, {});
+  const max = Math.max(...Object.values(freq));
+  return Object.keys(freq)
+    .filter((k) => freq[k] === max)
+    .map(Number);
+};
+
+mode([1, 2, 2, 3]);        // [2]
+mode([1, 1, 2, 2, 3]);    // [1, 2]  (tie)
+mode([5, 5, 5, 1, 2]);    // [5]
+```
+
+---
+
+### mean (average)
+
+```javascript
+const mean = (arr) => arr.reduce((sum, n) => sum + n, 0) / arr.length;
+
+mean([1, 2, 3, 4, 5]); // 3
+mean([10, 20, 30]);    // 20
+```
+
+---
+
+### standardDeviation
+
+```javascript
+const standardDeviation = (arr, population = false) => {
+  const avg = mean(arr);
+  const squaredDiffs = arr.map((n) => (n - avg) ** 2);
+  const variance = mean(squaredDiffs) * (population ? 1 : arr.length / (arr.length - 1));
+  return Math.sqrt(variance);
+};
+
+standardDeviation([2, 4, 4, 4, 5, 5, 7, 9]);           // 2 (population)
+standardDeviation([2, 4, 4, 4, 5, 5, 7, 9], false);   // sample std dev
+```
+
+---
+
+### isPowerOfTwo
+
+```javascript
+const isPowerOfTwo = (n) => n > 0 && (n & (n - 1)) === 0;
+
+isPowerOfTwo(1);   // true
+isPowerOfTwo(8);   // true
+isPowerOfTwo(16);  // true
+isPowerOfTwo(10);  // false
+```
+
+---
+
+### lerp / inverseLerp / remap
+
+```javascript
+// Linear interpolation
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// Inverse: find t given a value between a and b
+const inverseLerp = (a, b, value) => (value - a) / (b - a);
+
+// Remap a value from one range to another
+const remap = (value, fromA, fromB, toA, toB) =>
+  lerp(toA, toB, inverseLerp(fromA, fromB, value));
+
+lerp(0, 100, 0.25);          // 25
+inverseLerp(0, 100, 25);     // 0.25
+remap(50, 0, 100, 0, 1);     // 0.5
+remap(0, -1, 1, 0, 360);     // 180  (map -1..1 → 0..360 degrees)
+```
+
+---
+
+### Summary
+
+| Function | Input | Output |
+|---|---|---|
+| `gcd(12, 8)` | `12, 8` | `4` |
+| `lcm(4, 6)` | `4, 6` | `12` |
+| `factorial(5)` | `5` | `120` |
+| `fibonacci(10)` | `10` | `55` |
+| `isPrime(17)` | `17` | `true` |
+| `getPrimes(20)` | `20` | `[2,3,5,7,11,13,17,19]` |
+| `median([1,2,3,4])` | array | `2.5` |
+| `mode([1,1,2,2,3])` | array | `[1,2]` |
+| `standardDeviation(arr)` | array | std dev |
+| `isPowerOfTwo(8)` | `8` | `true` |
+| `lerp(0, 100, 0.25)` | `0, 100, 0.25` | `25` |
+| `remap(50, 0, 100, 0, 1)` | — | `0.5` |

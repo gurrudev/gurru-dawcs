@@ -1,0 +1,323 @@
+---
+title: Browser & Timing
+description: Debounce, throttle, clipboard, localStorage, scroll, and other browser utilities that every frontend dev needs in their toolkit.
+---
+
+### debounce
+
+Delay a function call until after a pause in invocations. Essential for search inputs, resize handlers, and form validation.
+
+```javascript
+const debounce = (fn, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+};
+
+// Usage: fire search only after user stops typing for 300ms
+const handleSearch = debounce((query) => {
+  console.log("Searching for:", query);
+}, 300);
+
+input.addEventListener("input", (e) => handleSearch(e.target.value));
+```
+
+---
+
+### throttle
+
+Limit how often a function can be called — fires at most once per interval.
+
+```javascript
+const throttle = (fn, limit) => {
+  let lastCall = 0;
+  return (...args) => {
+    const now = Date.now();
+    if (now - lastCall >= limit) {
+      lastCall = now;
+      return fn(...args);
+    }
+  };
+};
+
+// Usage: limit scroll event to once every 100ms
+window.addEventListener("scroll", throttle(() => {
+  console.log("scroll position:", window.scrollY);
+}, 100));
+```
+
+---
+
+### copyToClipboard
+
+Copy text to the clipboard.
+
+```javascript
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // Fallback for older browsers
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    const success = document.execCommand("copy");
+    document.body.removeChild(el);
+    return success;
+  }
+};
+
+// Usage
+await copyToClipboard("Hello, World!");
+```
+
+---
+
+### localStorage helpers
+
+Safe wrappers around `localStorage` that handle JSON serialization and errors.
+
+```javascript
+const storage = {
+  get: (key, fallback = null) => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  set: (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  remove: (key) => {
+    try {
+      localStorage.removeItem(key);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  clear: () => {
+    try {
+      localStorage.clear();
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
+
+// Usage
+storage.set("user", { name: "Alice", role: "admin" });
+storage.get("user");           // { name: "Alice", role: "admin" }
+storage.get("missing", []);   // []
+storage.remove("user");
+```
+
+---
+
+### getScrollPosition
+
+Get the current scroll position of the page or an element.
+
+```javascript
+const getScrollPosition = (el = window) => ({
+  x: el.pageXOffset ?? el.scrollLeft,
+  y: el.pageYOffset ?? el.scrollTop,
+});
+
+getScrollPosition();        // { x: 0, y: 342 }
+getScrollPosition(myDiv);   // { x: 0, y: 100 }
+```
+
+---
+
+### scrollToTop
+
+Smoothly scroll to the top of the page.
+
+```javascript
+const scrollToTop = (behavior = "smooth") =>
+  window.scrollTo({ top: 0, behavior });
+
+scrollToTop();          // smooth scroll
+scrollToTop("instant"); // instant jump
+```
+
+---
+
+### isInViewport
+
+Check if an element is currently visible in the viewport.
+
+```javascript
+const isInViewport = (el) => {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+};
+
+isInViewport(document.querySelector("#hero")); // true / false
+```
+
+---
+
+### sleep
+
+Pause execution for a number of milliseconds (useful in async functions).
+
+```javascript
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Usage in async function
+async function fetchWithDelay() {
+  await sleep(1000); // wait 1 second
+  const data = await fetch("/api/data");
+  return data.json();
+}
+```
+
+---
+
+### once
+
+Ensure a function is only called one time.
+
+```javascript
+const once = (fn) => {
+  let called = false;
+  let result;
+  return (...args) => {
+    if (!called) {
+      called = true;
+      result = fn(...args);
+    }
+    return result;
+  };
+};
+
+const init = once(() => {
+  console.log("Initialized!");
+  return 42;
+});
+
+init(); // "Initialized!" → 42
+init(); // 42 (no log — only runs once)
+```
+
+---
+
+### memoize
+
+Cache the results of a function based on its arguments.
+
+```javascript
+const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
+};
+
+const expensiveCalc = memoize((n) => {
+  console.log("Computing...");
+  return n * n;
+});
+
+expensiveCalc(5); // "Computing..." → 25
+expensiveCalc(5); // 25 (from cache, no log)
+expensiveCalc(6); // "Computing..." → 36
+```
+
+---
+
+### getDeviceType
+
+Detect if the user is on mobile, tablet, or desktop.
+
+```javascript
+const getDeviceType = () => {
+  const ua = navigator.userAgent;
+  if (/Mobi|Android/i.test(ua)) return "mobile";
+  if (/Tablet|iPad/i.test(ua)) return "tablet";
+  return "desktop";
+};
+
+getDeviceType(); // "mobile" | "tablet" | "desktop"
+```
+
+---
+
+### isBrowser
+
+Check if the code is running in a browser (not Node.js/SSR).
+
+```javascript
+const isBrowser = () => typeof window !== "undefined";
+
+isBrowser(); // true in browser, false in Node.js
+```
+
+---
+
+### getCookie / setCookie / deleteCookie
+
+```javascript
+const getCookie = (name) => {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
+const setCookie = (name, value, days = 7) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+};
+
+const deleteCookie = (name) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+};
+
+setCookie("theme", "dark", 30);
+getCookie("theme");   // "dark"
+deleteCookie("theme");
+getCookie("theme");   // null
+```
+
+---
+
+### Summary
+
+| Function | Purpose |
+|---|---|
+| `debounce(fn, ms)` | Delay until pause in calls |
+| `throttle(fn, ms)` | Fire at most once per interval |
+| `copyToClipboard(text)` | Async clipboard write |
+| `storage.get/set/remove` | Safe localStorage wrapper |
+| `getScrollPosition()` | Current scroll x/y |
+| `scrollToTop()` | Smooth scroll to top |
+| `isInViewport(el)` | Element visibility check |
+| `sleep(ms)` | Async delay |
+| `once(fn)` | Run only the first time |
+| `memoize(fn)` | Cache function results |
+| `getDeviceType()` | `"mobile"` \| `"tablet"` \| `"desktop"` |
+| `getCookie / setCookie` | Cookie read/write |

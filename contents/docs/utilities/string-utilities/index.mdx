@@ -1,0 +1,255 @@
+---
+title: String Utilities
+description: Common string manipulation functions that every developer needs but always has to look up. Copy-paste ready JavaScript/TypeScript snippets.
+---
+
+### capitalize
+
+Capitalize the first letter of a string.
+
+```javascript
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+capitalize("hello world"); // "Hello world"
+capitalize("javaScript");  // "JavaScript"
+```
+
+---
+
+### capitalizeWords
+
+Capitalize the first letter of every word.
+
+```javascript
+const capitalizeWords = (str) =>
+  str.replace(/\b\w/g, (char) => char.toUpperCase());
+
+capitalizeWords("hello world");        // "Hello World"
+capitalizeWords("the quick brown fox"); // "The Quick Brown Fox"
+```
+
+---
+
+### camelCase
+
+Convert a string to camelCase.
+
+```javascript
+const camelCase = (str) =>
+  str
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9]+(.)/g, (_, char) => char.toUpperCase());
+
+camelCase("hello world");      // "helloWorld"
+camelCase("background-color"); // "backgroundColor"
+camelCase("user_first_name");  // "userFirstName"
+```
+
+---
+
+### kebabCase
+
+Convert a string to kebab-case.
+
+```javascript
+const kebabCase = (str) =>
+  str
+    .match(/[A-Z]{2,}(?=[A-Z][a-z]+\d*|\b)|[A-Z]?[a-z]+\d*|[A-Z]|\d+/g)
+    .join("-")
+    .toLowerCase();
+
+kebabCase("helloWorld");       // "hello-world"
+kebabCase("backgroundColor");  // "background-color"
+kebabCase("HTMLParser");       // "html-parser"
+```
+
+---
+
+### snakeCase
+
+Convert a string to snake_case.
+
+```javascript
+const snakeCase = (str) =>
+  str
+    .match(/[A-Z]{2,}(?=[A-Z][a-z]+\d*|\b)|[A-Z]?[a-z]+\d*|[A-Z]|\d+/g)
+    .join("_")
+    .toLowerCase();
+
+snakeCase("helloWorld");      // "hello_world"
+snakeCase("backgroundColor"); // "background_color"
+snakeCase("userFirstName");   // "user_first_name"
+```
+
+---
+
+### slugify
+
+Convert a string to a URL-friendly slug.
+
+```javascript
+const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+slugify("Hello World!");         // "hello-world"
+slugify("  The Quick Brown Fox") // "the-quick-brown-fox"
+slugify("React & TypeScript");   // "react-typescript"
+```
+
+---
+
+### truncate
+
+Truncate a string to a given length and add an ellipsis.
+
+```javascript
+const truncate = (str, maxLength, suffix = "...") =>
+  str.length > maxLength ? str.slice(0, maxLength - suffix.length) + suffix : str;
+
+truncate("Hello, World!", 8);          // "Hello..."
+truncate("Short", 10);                 // "Short"
+truncate("Hello, World!", 8, " →");   // "Hello →"
+```
+
+---
+
+### reverse
+
+Reverse a string.
+
+```javascript
+const reverse = (str) => str.split("").reverse().join("");
+
+reverse("hello"); // "olleh"
+reverse("abcde"); // "edcba"
+```
+
+---
+
+### isPalindrome
+
+Check if a string is a palindrome (ignores case and non-alphanumeric).
+
+```javascript
+const isPalindrome = (str) => {
+  const clean = str.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return clean === clean.split("").reverse().join("");
+};
+
+isPalindrome("racecar");         // true
+isPalindrome("A man a plan a canal Panama"); // true
+isPalindrome("hello");           // false
+```
+
+---
+
+### countWords
+
+Count the number of words in a string.
+
+```javascript
+const countWords = (str) => str.trim().split(/\s+/).filter(Boolean).length;
+
+countWords("Hello World");          // 2
+countWords("  The quick brown fox") // 4
+countWords("");                     // 0
+```
+
+---
+
+### stripHtml
+
+Remove all HTML tags from a string.
+
+```javascript
+const stripHtml = (str) => str.replace(/<[^>]*>/g, "");
+
+stripHtml("<h1>Hello</h1> <p>World</p>"); // "Hello World"
+stripHtml("<b>Bold</b> text");            // "Bold text"
+```
+
+---
+
+### padStart / padEnd
+
+Pad a string to a given length (native JS but often forgotten).
+
+```javascript
+// Pad a number with leading zeros
+String(7).padStart(3, "0");  // "007"
+String(42).padStart(5, "0"); // "00042"
+
+// Pad with custom character
+"hi".padEnd(5, ".");         // "hi..."
+"hi".padStart(5, "-");       // "---hi"
+```
+
+---
+
+### repeat
+
+Repeat a string n times.
+
+```javascript
+const repeat = (str, n) => str.repeat(n);
+
+repeat("ab", 3);  // "ababab"
+repeat("ha", 4);  // "hahahaha"
+```
+
+---
+
+### escapeHtml
+
+Escape special HTML characters to prevent XSS.
+
+```javascript
+const escapeHtml = (str) =>
+  str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+escapeHtml('<script>alert("xss")</script>');
+// "&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;"
+```
+
+---
+
+### countOccurrences
+
+Count how many times a substring appears in a string.
+
+```javascript
+const countOccurrences = (str, sub) =>
+  str.split(sub).length - 1;
+
+countOccurrences("hello world hello", "hello"); // 2
+countOccurrences("aaaa", "aa");                 // 2
+```
+
+---
+
+### Summary
+
+| Function | Input | Output |
+|---|---|---|
+| `capitalize` | `"hello"` | `"Hello"` |
+| `capitalizeWords` | `"hello world"` | `"Hello World"` |
+| `camelCase` | `"hello-world"` | `"helloWorld"` |
+| `kebabCase` | `"helloWorld"` | `"hello-world"` |
+| `snakeCase` | `"helloWorld"` | `"hello_world"` |
+| `slugify` | `"Hello World!"` | `"hello-world"` |
+| `truncate` | `"Hello World", 8` | `"Hello..."` |
+| `reverse` | `"hello"` | `"olleh"` |
+| `isPalindrome` | `"racecar"` | `true` |
+| `countWords` | `"hello world"` | `2` |
+| `stripHtml` | `"<b>hi</b>"` | `"hi"` |
+| `escapeHtml` | `'<script>'` | `'&lt;script&gt;'` |

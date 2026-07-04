@@ -1,7 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { page_routes } from "@/lib/routes-config";
 import {
-    MoveUpRightIcon,
     TerminalSquareIcon,
     SquareArrowOutUpRight,
 } from "lucide-react";
@@ -54,7 +53,7 @@ export default function Home() {
                 <TerminalSquareIcon className="w-5 h-5 mr-1 mt-0.5" />
                 {"npm i string-utility-ts"}{" "}
                 <span className="text-orange-400 border border-orange-400 py-0 ml-2 px-2 rounded-lg text-sm">
-                    New
+                    Library
                 </span>
             </p>
         </div>
